@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+config.local.py
+secrets.json
+
+# Databases and runtime state
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Generated sensor data
+edge-node/logs/
+edge-node/plots/
+results/raw/
+
+# Runtime logs
+*.log
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

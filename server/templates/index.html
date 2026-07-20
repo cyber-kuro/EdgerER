@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>EdgeER Dashboard</title>
+
+    <div id="noteBox" style="
+        display:none;
+        background:white;
+        border:2px solid #444;
+        padding:20px;
+        margin:15px 0;
+        border-radius:10px;
+        box-shadow:0 2px 8px #aaa;
+    ">
+        <h3 id="noteBoxTitle">Post Note</h3>
+
+        <p>
+            <b>Patient:</b>
+            <span id="noteBoxPatient">None</span>
+        </p>
+
+        <textarea id="noteText" rows="4" style="width:100%; font-size:16px;"
+            placeholder="Write note here..."></textarea>
+
+        <br><br>
+
+        <button onclick="postNote()">Post</button>
+    </div>
+
+    <div id="handoffChoiceBox" style="
+        display:none;
+        background:white;
+        border:2px solid #444;
+        padding:20px;
+        margin:15px 0;
+        border-radius:10px;
+        box-shadow:0 2px 8px #aaa;
+    ">
+        <h3>Patient dismissed</h3>
+
+        <p>Generate handoff summary?</p>
+
+        <button onclick="confirmHandoffYes()">Yes</button>
+        <button onclick="confirmHandoffNo()">No</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=20260701-rr-columns-1">
+</head>
+<body>
+<button onclick="enableSound()">Enable Alert Sound</button>
+<h1>EdgeER Dashboard</h1>
+
+<div class="card">
+    <h2>Register Patient</h2>
+
+    <input id="regPatientId" placeholder="Patient ID, e.g. P001">
+    <input id="regName" placeholder="Name or anonymous code">
+    <input id="regAge" placeholder="Age">
+
+    <input id="regComplaint" placeholder="Chief complaint">
+
+    <select id="regTriage">
+        <option value="">Triage level</option>
+        <option value="Unknown">Unknown</option>
+        <option value="Red">Red</option>
+        <option value="Orange">Orange</option>
+        <option value="Yellow">Yellow</option>
+        <option value="Green">Green</option>
+    </select>
+
+    <input id="regLocation" placeholder="Location, e.g. Waiting Room B">
+    <input id="regDevice" placeholder="Assigned device ID, e.g. PI-001">
+
+    <button onclick="registerPatient()">Register Patient</button>
+</div>
+
+<div class="card">
+    <h2>Device Status</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Device ID</th>
+                <th>Device Type</th>
+                <th>Assigned Patient</th>
+                <th>Status</th>
+                <th>Battery</th>
+                <th>Wi-Fi RSSI</th>
+                <th>Last Seen</th>
+                <th>Firmware</th>
+            </tr>
+        </thead>
+
+        <tbody id="devicesTable"></tbody>
+    </table>
+</div>
+
+<div class="card">
+
+    <h2>Patient Details</h2>
+
+        <p><b>Selected Patient:</b>
+            <span id="selectedPatient">None</span>
+        </p>
+
+        <h3>Research RR (PPG-derived)</h3>
+        <div id="researchRrDetail" class="rr-detail rr-unavailable">
+            Select a patient to view PPG-derived RR metadata.
+        </div>
+
+        <div id="actionButtons" style="margin: 15px 0;">
+            <button onclick="openNoteBox('Seen by nurse')">Seen by nurse</button>
+            <button onclick="openNoteBox('Doctor notified')">Doctor notified</button>
+            <button onclick="openNoteBox('Escalation')">Escalate</button>
+            <button onclick="openNoteBox('Recheck in 15 min')">Recheck in 15 min</button>
+            <button onclick="openNoteBox('Medication given')">Medication given</button>
+            <button onclick="generateHandoff()">Generate Handoff</button>
+            <button onclick="openNoteBox('Dismissed to monitoring room')">Dismiss to Monitoring Room</button>
+        </div>
+
+        <h3>Handoff Summary</h3>
+
+        <pre id="handoffSummary" style="
+            background:#f0f0f0;
+            padding:15px;
+            border-radius:8px;
+            white-space:pre-wrap;
+        ">Select a patient and click Generate Handoff.</pre>
+
+        <canvas id="patientChart"></canvas>
+
+        <br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>HR</th>
+                    <th>SpO₂</th>
+                    <th>Temp</th>
+                    <th>PPG-derived RR</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="detailHistory"></tbody>
+
+        </table>
+
+        <h3>Patient Timeline</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+
+            <tbody id="eventTimeline"></tbody>
+        </table>
+
+    </div>
+
+    <h2>Priority Patients</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Complaint</th>
+                <th>Triage</th>
+                <th>Location</th>
+                <th>HR</th>
+                <th>SpO₂</th>
+                <th>Temp</th>
+                <th>RR</th>
+                <th>Status</th>
+                <th>Reasons</th>
+                <th>Last Seen</th>
+                <th>Workflow</th>
+                <th>Alert</th>
+            </tr>
+        </thead>
+
+        <tbody id="priorityPatientsTable"></tbody>
+    </table>
+
+    <br>
+
+    <h2>All Patients</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Complaint</th>
+                <th>Triage</th>
+                <th>Location</th>
+                <th>HR</th>
+                <th>SpO₂</th>
+                <th>Temp</th>
+                <th>RR</th>
+                <th>Status</th>
+                <th>Reasons</th>
+                <th>Last Seen</th>
+                <th>Workflow</th>
+                <th>Alert</th>
+            </tr>
+        </thead>
+
+        <tbody id="patientsTable"></tbody>
+    </table>
+</div>
+
+<script src="{{ url_for('static', path='/dashboard.js') }}?v=20260701-rr-columns-1"></script>
+
+</body>
+</html>

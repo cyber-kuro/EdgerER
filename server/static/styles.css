@@ -1,0 +1,89 @@
+body { font-family: Arial; margin: 25px; background: #f5f5f5; }
+h1 { margin-bottom: 10px; }
+.card {
+    background: white;
+    padding: 18px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #ccc;
+}
+.status {
+    font-size: 28px;
+    font-weight: bold;
+}
+.GREEN { color: green; font-weight: bold; }
+.YELLOW { color: goldenrod; font-weight: bold; }
+.ORANGE { color: orange; font-weight: bold; }
+.RED { color: red; font-weight: bold; }
+.GRAY { color: gray; font-weight: bold; }
+.STABILIZING { color: blue; font-weight: bold; }
+.OFFLINE { color: black; background: #ddd; padding: 5px; }
+.CRASHING { color: white; background: red; font-weight: bold; padding: 5px; }
+.ACTIVE { color: green; font-weight: bold; }
+.AVAILABLE, .ASSIGNED { color: #444; font-weight: bold; }
+.LOW_BATTERY, .SENSOR_FAULT, .NEEDS_CLEANING { color: darkorange; font-weight: bold; }
+
+table { border-collapse: collapse; width: 100%; background: white; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+th { background: #eee; }
+
+.rr-detail {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #bbb;
+    border-left-width: 5px;
+    border-radius: 6px;
+    background: #fafafa;
+    line-height: 1.55;
+}
+.rr-detail.rr-good { border-left-color: #2e7d32; background: #edf7ed; }
+.rr-detail.rr-moderate { border-left-color: #b77900; background: #fff8e1; }
+.rr-detail.rr-unreliable,
+.rr-detail.rr-unavailable {
+    border-left-color: #777;
+    border-style: dashed;
+    background: #f1f1f1;
+    color: #444;
+}
+.rr-inline {
+    display: block;
+    min-width: 145px;
+    line-height: 1.35;
+    font-weight: bold;
+}
+.rr-inline.rr-good { color: #1b5e20; }
+.rr-inline.rr-moderate { color: #704d00; }
+.rr-inline.rr-unreliable {
+    padding: 5px;
+    border: 1px dashed #888;
+    background: #f1f1f1;
+    color: #7a1f1f;
+}
+.rr-source { display: block; font-size: 12px; color: #555; }
+.rr-quality {
+    display: inline-block;
+    margin: 3px 0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.rr-quality.rr-good { color: #1b5e20; background: #dcedc8; }
+.rr-quality.rr-moderate { color: #704d00; background: #ffe7a3; }
+.rr-quality.rr-unreliable { color: #7a1f1f; background: #e0e0e0; }
+.rr-meta, .rr-disclaimer { font-size: 12px; color: #555; }
+
+.RECHECK_BADGE {
+    background: gold;
+    color: black;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    animation: flashYellow 0.8s infinite;
+}
+
+@keyframes flashYellow {
+    0% { opacity: 1; }
+    50% { opacity: 0.25; }
+    100% { opacity: 1; }
+}

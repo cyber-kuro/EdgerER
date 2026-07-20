@@ -30,6 +30,18 @@ class FakeMAX30102:
         }
 
 
+class TemporarilyFailingMAX30102(FakeMAX30102):
+    def __init__(self, failures=2):
+        super().__init__()
+        self.failures = failures
+
+    def read_raw_sample(self):
+        if self.failures:
+            self.failures -= 1
+            raise OSError("temporary I2C error")
+        return super().read_raw_sample()
+
+
 def wait_for_samples(stream, minimum, timeout_sec=1.0):
     deadline = time.monotonic() + timeout_sec
     while time.monotonic() < deadline:
@@ -99,6 +111,38 @@ class PPGStreamTests(unittest.TestCase):
 
         self.assertGreaterEqual(stats["large_timing_gaps"], 2)
         self.assertGreaterEqual(stats["estimated_dropped_samples"], 2)
+
+    def test_recent_window_is_an_independent_snapshot(self):
+        stream = PPGStream(
+            sensor=FakeMAX30102(),
+            sample_interval_sec=0.005,
+            ring_buffer_seconds=0.1,
+        )
+        stream.start()
+        wait_for_samples(stream, 6)
+        stream.stop()
+
+        first_snapshot = stream.get_recent_window(0.1)
+        first_snapshot.clear()
+        second_snapshot = stream.get_recent_window(0.1)
+
+        self.assertGreaterEqual(len(second_snapshot), 6)
+
+    def test_temporary_read_errors_are_exposed_without_stopping_stream(self):
+        stream = PPGStream(
+            sensor=TemporarilyFailingMAX30102(failures=2),
+            sample_interval_sec=0.005,
+            ring_buffer_seconds=0.1,
+        )
+        stream.start()
+        wait_for_samples(stream, 4)
+
+        self.assertTrue(stream.is_running())
+        stats = stream.get_stats()
+        stream.stop()
+
+        self.assertEqual(stats["read_errors"], 2)
+        self.assertIn("temporary I2C error", stats["last_error"])
 
 
 if __name__ == "__main__":

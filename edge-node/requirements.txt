@@ -1,0 +1,7 @@
+adafruit-circuitpython-mlx90614
+gpiozero
+matplotlib
+numpy
+requests
+scipy
+smbus2

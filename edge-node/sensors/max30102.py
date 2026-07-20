@@ -1,7 +1,7 @@
 import time
 from smbus2 import SMBus
-import numpy as np
-from scipy.signal import butter, filtfilt, find_peaks
+
+from processing.ppg_quality import PPGData
 
 
 class MAX30102Sensor:
@@ -79,9 +79,15 @@ class MAX30102Sensor:
         self.bus.close()
 
     def estimate_heart_rate(self, duration_sec=6, sample_delay=0.04):
+        """Compatibility wrapper around the buffer-based pulse processor.
+
+        New live code must use PPGStream and process its snapshots instead.
+        This method temporarily retains the original blocking acquisition
+        behavior for standalone scripts and calls the shared calculation.
+        """
         red_values = []
         ir_values = []
-        sample_rate = 1.0 / sample_delay
+        monotonic_times = []
 
         warmup_start = time.time()
         while time.time() - warmup_start < 1.0:
@@ -93,123 +99,28 @@ class MAX30102Sensor:
             red, ir = self.read_fifo()
             red_values.append(red)
             ir_values.append(ir)
+            monotonic_times.append(time.monotonic())
             time.sleep(sample_delay)
 
-        red = np.array(red_values, dtype=float)
-        ir = np.array(ir_values, dtype=float)
+        # Import lazily so the sensor driver remains importable independently
+        # and tests can verify that this wrapper delegates the calculation.
+        from processing.hr_spo2 import estimate_hr_spo2_from_samples
 
-        red_mean = float(np.mean(red))
-        ir_mean = float(np.mean(ir))
-        ir_std = float(np.std(ir))
-
-        if ir_mean < 50000:
-            return {
-                "heart_rate_bpm": None,
-                "spo2_percent": None,
-                "num_peaks": 0,
-                "samples": len(ir),
-                "ir_mean": round(ir_mean, 2),
-                "ir_std": round(ir_std, 2),
-                "finger_detected": False,
-                "signal_quality": "NO_FINGER",
-            }
-
-        if ir_std < 50:
-            return {
-                "heart_rate_bpm": None,
-                "spo2_percent": None,
-                "num_peaks": 0,
-                "samples": len(ir),
-                "ir_mean": round(ir_mean, 2),
-                "ir_std": round(ir_std, 2),
-                "finger_detected": True,
-                "signal_quality": "WEAK_SIGNAL",
-            }
-
-        ir_signal = ir - ir_mean
-        red_signal = red - red_mean
-
-        kernel = np.ones(5) / 5
-        ir_smooth = np.convolve(ir_signal, kernel, mode="same")
-        red_smooth = np.convolve(red_signal, kernel, mode="same")
-
-        low = 0.67
-        high = 3.0
-        nyquist = 0.5 * sample_rate
-
-        b, a = butter(2, [low / nyquist, high / nyquist], btype="band") #type: ignore
-
-        try:
-            ir_filtered = filtfilt(b, a, ir_smooth)
-            red_filtered = filtfilt(b, a, red_smooth)
-        except Exception:
-            return {
-                "heart_rate_bpm": None,
-                "spo2_percent": None,
-                "num_peaks": 0,
-                "samples": len(ir),
-                "ir_mean": round(ir_mean, 2),
-                "ir_std": round(ir_std, 2),
-                "finger_detected": True,
-                "signal_quality": "UNSTABLE",
-            }
-
-        peaks, _ = find_peaks(
-            ir_filtered,
-            distance=8,
-            prominence=np.std(ir_filtered) * 0.6,
+        elapsed_times = (
+            [value - monotonic_times[0] for value in monotonic_times]
+            if monotonic_times
+            else []
         )
-
-        if len(peaks) < 4:
-            return {
-                "heart_rate_bpm": None,
-                "spo2_percent": None,
-                "num_peaks": int(len(peaks)),
-                "samples": len(ir),
-                "ir_mean": round(ir_mean, 2),
-                "ir_std": round(ir_std, 2),
-                "finger_detected": True,
-                "signal_quality": "UNSTABLE",
-            }
-
-        peak_intervals = np.diff(peaks) / sample_rate
-        median_interval = float(np.median(peak_intervals))
-        bpm = 60.0 / median_interval
-        interval_std = float(np.std(peak_intervals))
-
-        if bpm < 40 or bpm > 180 or interval_std > 0.35:
-            return {
-                "heart_rate_bpm": None,
-                "spo2_percent": None,
-                "num_peaks": int(len(peaks)),
-                "samples": len(ir),
-                "ir_mean": round(ir_mean, 2),
-                "ir_std": round(ir_std, 2),
-                "finger_detected": True,
-                "signal_quality": "UNSTABLE",
-            }
-
-        red_ac = float(np.std(red_filtered))
-        ir_ac = float(np.std(ir_filtered))
-
-        if red_mean <= 0 or ir_mean <= 0 or ir_ac <= 0:
-            spo2 = None
-        else:
-            ratio = (red_ac / red_mean) / (ir_ac / ir_mean)
-            spo2 = 110.0 - 25.0 * ratio
-            spo2 = max(70.0, min(100.0, spo2))
-
-        return {
-            "heart_rate_bpm": round(bpm, 1),
-            "spo2_percent": round(spo2, 1) if spo2 is not None else None,
-            "num_peaks": int(len(peaks)),
-            "samples": len(ir),
-            "ir_mean": round(ir_mean, 2),
-            "ir_std": round(ir_std, 2),
-            "finger_detected": True,
-            "signal_quality": "GOOD",
-            "peak_interval_std": round(interval_std, 3),
-        }
+        data = PPGData(
+            elapsed_time_sec=elapsed_times,
+            monotonic_time_sec=monotonic_times,
+            red_raw=red_values,
+            ir_raw=ir_values,
+        )
+        return estimate_hr_spo2_from_samples(
+            data,
+            sample_rate_hz=1.0 / sample_delay,
+        )
 
 
 if __name__ == "__main__":

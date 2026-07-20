@@ -1,4 +1,4 @@
-"""Offline signal-processing helpers for recorded EdgeER measurements."""
+"""Hardware-independent signal processing for live and recorded EdgeER PPG."""
 
 from processing.ppg_quality import (
     PPGData,
@@ -6,6 +6,8 @@ from processing.ppg_quality import (
     analyze_ppg_quality,
     load_ppg_csv,
 )
+from processing.hr_spo2 import estimate_hr_spo2_from_samples
+from processing.ppg_pipeline import SharedPPGPipeline
 from processing.respiratory_rate import (
     RespiratoryRateAnalysis,
     RespiratoryRateDiagnostics,
@@ -23,6 +25,8 @@ __all__ = [
     "RespiratoryRateAnalysis",
     "RespiratoryRateDiagnostics",
     "RespiratoryRateResult",
+    "SharedPPGPipeline",
+    "estimate_hr_spo2_from_samples",
     "estimate_respiratory_rate",
     "load_ppg_csv_for_rr",
 ]

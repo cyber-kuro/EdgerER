@@ -143,6 +143,7 @@ class PPGStream:
             read_errors = self._read_errors
             last_error = self._last_error
             fifo_read_errors = self._fifo_read_errors
+            last_fifo_error = self._last_fifo_error
             fifo_overflow_events = self._fifo_overflow_events
             fifo_state = dict(self._last_fifo_state)
 
@@ -171,6 +172,7 @@ class PPGStream:
             "read_errors": read_errors,
             "last_error": last_error,
             "fifo_read_errors": fifo_read_errors,
+            "last_fifo_error": last_fifo_error,
             "fifo_overflow_events": fifo_overflow_events,
             "fifo_write_pointer": fifo_state.get("write_pointer"),
             "fifo_read_pointer": fifo_state.get("read_pointer"),
@@ -202,6 +204,7 @@ class PPGStream:
             self._last_error = None
             self._previous_sample_time: Optional[float] = None
             self._fifo_read_errors = 0
+            self._last_fifo_error: Optional[str] = None
             self._fifo_overflow_events = 0
             self._last_fifo_state: Dict[str, Any] = {}
 
@@ -226,6 +229,10 @@ class PPGStream:
                 with self._data_lock:
                     self._read_errors += 1
                     self._last_error = f"{type(exc).__name__}: {exc}"
+                # Resume from the current time after a blocking I2C failure;
+                # otherwise the loop could spin through overdue deadlines.
+                if time.monotonic() - next_deadline > self.sample_interval_sec * 4:
+                    next_deadline = time.monotonic()
                 continue
 
             self._append_sample(
@@ -271,9 +278,10 @@ class PPGStream:
 
         try:
             state = dict(get_fifo_state())
-        except Exception:
+        except Exception as exc:
             with self._data_lock:
                 self._fifo_read_errors += 1
+                self._last_fifo_error = f"{type(exc).__name__}: {exc}"
             return
 
         with self._data_lock:

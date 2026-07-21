@@ -1,0 +1,129 @@
+edge-node\scripts\analyze_ppg_csv.py: PASS
+usage: analyze_ppg_csv.py [-h] [--summary SUMMARY] [--plot PLOT] csv_path
+
+Analyze the acquisition quality of a raw EdgeER PPG CSV. This tool does not
+estimate respiratory rate.
+
+positional arguments:
+  csv_path           CSV produced by scripts/record_ppg_csv.py
+
+options:
+  -h, --help         show this help message and exit
+  --summary SUMMARY  optional summary CSV path (default:
+                     logs/<name>_quality_summary.csv)
+  --plot PLOT        optional plot path (default: plots/<name>_quality.png)
+
+
+edge-node\scripts\estimate_rr_from_ppg_csv.py: PASS
+usage: estimate_rr_from_ppg_csv.py [-h] [--discard-seconds DISCARD_SECONDS]
+                                   [--result RESULT] [--plot PLOT]
+                                   csv_path
+
+Estimate research-only respiratory rate from a recorded EdgeER PPG CSV. This
+estimator is not clinically validated.
+
+positional arguments:
+  csv_path              CSV produced by scripts/record_ppg_csv.py
+
+options:
+  -h, --help            show this help message and exit
+  --discard-seconds DISCARD_SECONDS
+                        startup transient to discard, from 3 to 5 seconds
+                        (default: 5)
+  --result RESULT       optional result CSV path (default:
+                        logs/<name>_rr_result.csv)
+  --plot PLOT           optional plot path (default:
+                        plots/<name>_rr_diagnostic.png)
+
+
+edge-node\scripts\record_ppg_csv.py: PASS
+usage: record_ppg_csv.py [-h] [--seconds SECONDS] [--output OUTPUT]
+
+Record a raw MAX30102 PPG window to CSV.
+
+options:
+  -h, --help         show this help message and exit
+  --seconds SECONDS  recording duration (default: 60 seconds)
+  --output OUTPUT    optional output CSV path (default: timestamped file in
+                     logs/)
+
+
+edge-node\scripts\rr_validation_session.py: PASS
+usage: rr_validation_session.py [-h] [--summary]
+
+Collect one controlled 60-second PPG validation trial, or summarize previous
+trials. Research/prototype use only.
+
+options:
+  -h, --help  show this help message and exit
+  --summary   summarize logs/rr_live_validation_results.csv without using
+              hardware
+
+
+edge-node\scripts\test_live_rr_packet.py: PASS
+usage: test_live_rr_packet.py [-h] [--seconds SECONDS]
+                              [--server-url SERVER_URL] [--timeout TIMEOUT]
+                              [--no-post] [--save-window] [--no-save-window]
+
+Collect one live PPG window, estimate research-only RR, run the unchanged
+legacy HR/SpO2 estimator, and POST one test packet.
+
+options:
+  -h, --help            show this help message and exit
+  --seconds SECONDS     PPG window from 45 to 60 seconds (default: 60)
+  --server-url SERVER_URL
+                        one-shot POST destination (default:
+                        http://192.168.0.15:8000/api/vitals)
+  --timeout TIMEOUT     HTTP timeout in seconds (default: 5)
+  --no-post             build and print the packet without sending it
+  --save-window         save the captured raw PPG window plus quality/RR
+                        diagnostics (default)
+  --no-save-window      skip saving live PPG debug CSVs and plots
+
+
+edge-node\scripts\validate_rr_recordings.py: PASS
+usage: validate_rr_recordings.py [-h] [--manifest MANIFEST] [--output OUTPUT]
+
+Batch the offline PPG-derived RR estimator against a prototype validation
+manifest. This is not clinical validation.
+
+options:
+  -h, --help           show this help message and exit
+  --manifest MANIFEST  manifest CSV (default:
+                       C:\Users\hassa\Documents\EdgeER\edge-
+                       node\logs\rr_validation_manifest.csv)
+  --output OUTPUT      results CSV (default:
+                       C:\Users\hassa\Documents\EdgeER\edge-
+                       node\logs\rr_validation_results.csv)
+
+
+server\simulate_nodes.py: PASS
+usage: simulate_nodes.py [-h]
+
+Send EdgeER demonstration packets to the local server.
+
+options:
+  -h, --help  show this help message and exit
+
+
+tools\software_validation\run_all_software_validation.py: PASS
+usage: run_all_software_validation.py [-h] [--quick | --full]
+                                      [--output-dir OUTPUT_DIR] [--seed SEED]
+                                      [--keep-temp-data] [--skip-browser]
+                                      [--skip-scalability]
+                                      [--device-counts DEVICE_COUNTS]
+                                      [--duration-seconds DURATION_SECONDS]
+
+Run isolated EdgeER software validation.
+
+options:
+  -h, --help            show this help message and exit
+  --quick               Run the short bounded suite (default).
+  --full                Run all counts with three benchmark repetitions.
+  --output-dir OUTPUT_DIR
+  --seed SEED
+  --keep-temp-data
+  --skip-browser
+  --skip-scalability
+  --device-counts DEVICE_COUNTS
+  --duration-seconds DURATION_SECONDS

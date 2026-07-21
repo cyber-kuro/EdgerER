@@ -1,0 +1,19 @@
+Git commit: 3290b7bb9a949d3e1a9f25914cf924916b23cc5b
+Branch: main
+Tracked files: 61
+Python files compiled: 54
+
+Findings:
+CRITICAL tracked_database server/edgeer.db:
+WARNING personal_path RELEASE_CANDIDATE.md:54
+INFO local_ip RELEASE_CANDIDATE.md:61
+WARNING personal_path RELEASE_CANDIDATE.md:65
+INFO local_ip RELEASE_CANDIDATE.md:68
+INFO local_ip RELEASE_CANDIDATE.md:69
+INFO local_ip RELEASE_CANDIDATE.md:70
+INFO local_ip RELEASE_CANDIDATE.md:71
+INFO local_ip RELEASE_CANDIDATE.md:72
+INFO local_ip RELEASE_CANDIDATE.md:73
+INFO local_ip edge-node\config.py:6
+WARNING personal_path server\research\rr_ppg\README.md:68
+WARNING personal_path server\research\rr_ppg\README.md:86

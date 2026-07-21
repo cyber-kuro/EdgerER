@@ -15,6 +15,7 @@ if str(PROJECT_DIR) not in sys.path:
 import database
 import server
 import simulate_nodes
+import state
 
 
 class RespiratoryRateDisplayTests(unittest.TestCase):
@@ -189,7 +190,10 @@ class RespiratoryRateDisplayTests(unittest.TestCase):
         self.assertIn("Research RR (PPG-derived)", dashboard.text)
         self.assertIn("PPG-derived RR", dashboard.text)
         self.assertIn('id="researchRrDetail"', dashboard.text)
-        self.assertIn("/static/dashboard.js?v=20260701-rr-columns-1", dashboard.text)
+        self.assertIn("/static/dashboard.js?v=20260720-rc1", dashboard.text)
+        self.assertIn('id="regDevice"', dashboard.text)
+        self.assertIn('id="toastRegion"', dashboard.text)
+        self.assertIn("Investigational engineering prototype", dashboard.text)
 
     def test_patient_table_headers_and_rendered_cell_contracts_align(self):
         template = (PROJECT_DIR / "templates" / "index.html").read_text(
@@ -206,7 +210,9 @@ class RespiratoryRateDisplayTests(unittest.TestCase):
             table_prefix = template[table_start:marker_index]
             return [
                 re.sub(r"<[^>]+>", "", value).strip()
-                for value in re.findall(r"<th>(.*?)</th>", table_prefix, re.DOTALL)
+                for value in re.findall(
+                    r"<th[^>]*>(.*?)</th>", table_prefix, re.DOTALL
+                )
             ]
 
         patient_headers = [
@@ -229,8 +235,8 @@ class RespiratoryRateDisplayTests(unittest.TestCase):
         self.assertEqual(headers_before("patientsTable"), patient_headers)
         self.assertEqual(headers_before("detailHistory"), detail_headers)
 
-        patient_row_start = javascript.index("const rowHtml = `")
-        patient_row_end = javascript.index("if (p.priority)", patient_row_start)
+        patient_row_start = javascript.index("function patientRowHtml")
+        patient_row_end = javascript.index("function renderPatientTable", patient_row_start)
         patient_row = javascript[patient_row_start:patient_row_end]
         self.assertEqual(
             re.findall(r'<td data-column="([^"]+)"', patient_row),
@@ -251,15 +257,89 @@ class RespiratoryRateDisplayTests(unittest.TestCase):
             ],
         )
 
-        detail_row_start = javascript.index("detailTable.innerHTML += `")
-        detail_row_end = javascript.index("</tr>", detail_row_start)
+        detail_row_start = javascript.index("detailTable.innerHTML = patientHistory")
+        detail_row_end = javascript.index("async function loadPatientEvents", detail_row_start)
         detail_row = javascript[detail_row_start:detail_row_end]
         self.assertEqual(
             re.findall(r'<td data-column="([^"]+)"', detail_row),
             ["timestamp", "hr", "spo2", "temp", "rr", "status"],
         )
         self.assertIn("function format_rr(packet)", javascript)
-        self.assertIn("withheld (", javascript)
+        self.assertIn("Stale / withheld", javascript)
+
+    def test_dashboard_has_device_dropdown_and_feedback_states(self):
+        template = (PROJECT_DIR / "templates" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        javascript = (PROJECT_DIR / "static" / "dashboard.js").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertRegex(template, r'<select id="regDevice"[^>]*disabled>')
+        self.assertIn("Loading available devices", template)
+        self.assertIn(
+            "No online and available devices are currently available.",
+            javascript,
+        )
+        self.assertIn("Register without a device", javascript)
+        self.assertIn("device.assignable", javascript)
+        self.assertIn("refreshAvailableDevices", javascript)
+        self.assertIn("Could not load the device registry", javascript)
+        self.assertIn("showToast", javascript)
+        self.assertNotIn("window.alert", javascript)
+        self.assertNotRegex(javascript, r"\balert\(")
+
+    def test_device_api_exposes_authoritative_eligibility_fields(self):
+        registration = self.client.post(
+            "/api/register_device",
+            json={"device_id": "D-ELIGIBLE", "device_type": "RASPBERRY_PI"},
+        )
+        self.assertEqual(registration.status_code, 200)
+
+        offline = next(
+            device for device in self.client.get("/api/devices").json()
+            if device["device_id"] == "D-ELIGIBLE"
+        )
+        self.assertFalse(offline["online"])
+        self.assertFalse(offline["assignable"])
+        self.assertIn("offline", offline["unavailable_reason"])
+
+        state.devices["D-ELIGIBLE"]["last_seen"] = database.utc_now_string()
+        database.save_device(state.devices["D-ELIGIBLE"])
+        online = next(
+            device for device in self.client.get("/api/devices").json()
+            if device["device_id"] == "D-ELIGIBLE"
+        )
+        self.assertTrue(online["online"])
+        self.assertTrue(online["assignable"])
+        self.assertIsNone(online["unavailable_reason"])
+
+    def test_registration_api_returns_structured_device_errors(self):
+        unknown = self.client.post(
+            "/api/register_patient",
+            json={
+                "patient_id": "P-UNKNOWN-API",
+                "assigned_device_id": "D-UNKNOWN-API",
+            },
+        )
+
+        self.assertEqual(unknown.status_code, 400)
+        self.assertEqual(unknown.json()["code"], "UNKNOWN_DEVICE")
+        self.assertEqual(unknown.json()["field"], "assigned_device_id")
+
+        self.client.post(
+            "/api/register_device",
+            json={"device_id": "D-OFFLINE-API"},
+        )
+        offline = self.client.post(
+            "/api/register_patient",
+            json={
+                "patient_id": "P-OFFLINE-API",
+                "assigned_device_id": "D-OFFLINE-API",
+            },
+        )
+        self.assertEqual(offline.status_code, 409)
+        self.assertEqual(offline.json()["code"], "DEVICE_OFFLINE")
 
     def test_schema_contains_typed_rr_columns(self):
         expected = {

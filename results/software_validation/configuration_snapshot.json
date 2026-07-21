@@ -1,0 +1,66 @@
+{
+  "benchmark_packet_interval_seconds": 0.0,
+  "device_statuses": [
+    "ACTIVE",
+    "ASSIGNED",
+    "AVAILABLE",
+    "LOW_BATTERY",
+    "NEEDS_CLEANING",
+    "OFFLINE",
+    "SENSOR_FAULT"
+  ],
+  "maximum_clock_lead_seconds": 60,
+  "maximum_packet_age_seconds": 300,
+  "numeric_ranges": {
+    "ambient_temp_c": [
+      0,
+      60
+    ],
+    "battery_percent": [
+      0,
+      100
+    ],
+    "diastolic_bp": [
+      30,
+      150
+    ],
+    "heart_rate_bpm": [
+      20,
+      250
+    ],
+    "object_temp_c": [
+      30,
+      45
+    ],
+    "ppg_sqi": [
+      0,
+      1
+    ],
+    "resp_rate_bpm": [
+      4,
+      60
+    ],
+    "rr_confidence": [
+      0,
+      1
+    ],
+    "spo2_percent": [
+      50,
+      100
+    ],
+    "systolic_bp": [
+      50,
+      250
+    ]
+  },
+  "offline_after_seconds": 15,
+  "recheck_after_seconds": 900,
+  "rr_confidence_gate": 0.5,
+  "simulator_scenarios": [
+    "stable",
+    "yellow_low_oxygen",
+    "orange_trend",
+    "crashing",
+    "no_finger"
+  ]
+}

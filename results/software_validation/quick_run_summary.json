@@ -1,0 +1,517 @@
+{
+  "all_blocked": [],
+  "all_failures": [
+    "static_checks: tracked_database: server/edgeer.db"
+  ],
+  "automated_test_totals": {
+    "collected": 83,
+    "failed": 0,
+    "passed": 83,
+    "skipped": 0,
+    "xfailed": 0
+  },
+  "critical_failures": [
+    "static_checks"
+  ],
+  "environment": {
+    "captured_at_utc": "2026-07-21T03:20:34.517754+00:00",
+    "database_path_type": "isolated temporary SQLite files",
+    "deterministic_seed": 20260720,
+    "device_counts": [
+      1,
+      5,
+      10
+    ],
+    "duration_seconds_per_scalability_run": 1.0,
+    "git_branch": "main",
+    "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+    "git_dirty": true,
+    "installed_package_versions": {
+      "fastapi": "0.116.1",
+      "httpx": "0.28.1",
+      "matplotlib": "3.10.6",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2",
+      "playwright": null,
+      "psutil": "7.0.0",
+      "pytest": null,
+      "scipy": "1.16.2",
+      "selenium": null,
+      "starlette": "0.47.3",
+      "uvicorn": "0.35.0"
+    },
+    "logical_cpu_count": 16,
+    "operating_system": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "production_database_used": false,
+    "python_version": "3.11.9",
+    "selected_test_mode": "quick",
+    "sqlite_version": "3.45.1",
+    "total_memory_bytes": 33345478656
+  },
+  "generated_at_utc": "2026-07-21T03:21:20.366675+00:00",
+  "groups": [
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 23.086545499973,
+      "failures": [],
+      "name": "automated_tests",
+      "status": "PASS",
+      "summary": {
+        "edge_node": {
+          "collected": 54,
+          "exit_code": 0,
+          "failed": 0,
+          "passed": 54,
+          "runtime_seconds": 13.804793800052721,
+          "skipped": 0,
+          "xfailed": 0
+        },
+        "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+        "server": {
+          "collected": 29,
+          "exit_code": 0,
+          "failed": 0,
+          "passed": 29,
+          "runtime_seconds": 9.250764399999753,
+          "skipped": 0,
+          "xfailed": 0
+        },
+        "totals": {
+          "collected": 83,
+          "failed": 0,
+          "passed": 83,
+          "skipped": 0,
+          "xfailed": 0
+        }
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 2.461816800001543,
+      "failures": [],
+      "name": "packet_validation",
+      "status": "PASS",
+      "summary": {
+        "cases_without_clear_rejection_reason": 0,
+        "failed": 0,
+        "false_acceptances": 0,
+        "false_rejections": 0,
+        "passed": 45,
+        "rule_handling_accuracy_percent": 100.0,
+        "total_cases": 45
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 1.007361399999354,
+      "failures": [],
+      "name": "device_lifecycle",
+      "status": "PASS",
+      "summary": {
+        "failed": 0,
+        "passed": 31,
+        "total": 31
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 1.5239831000217237,
+      "failures": [],
+      "name": "workflow",
+      "status": "PASS",
+      "summary": {
+        "failed": 0,
+        "passed": 3,
+        "scenarios": 3
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 0.3219730999553576,
+      "failures": [],
+      "name": "database_persistence",
+      "status": "PASS",
+      "summary": {
+        "checks": 6,
+        "failed": 0,
+        "foreign_key_violations": 0,
+        "integrity_check": "ok",
+        "passed": 6
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 3.327225200016983,
+      "failures": [],
+      "name": "scalability",
+      "status": "PASS",
+      "summary": {
+        "configurations": 3,
+        "rows": [
+          {
+            "accepted_packets": 24,
+            "attempted_packets": 25,
+            "cpu_average_percent": 2.4056422149655403,
+            "database_growth_bytes": 65536,
+            "device_count": 1,
+            "mean_latency_ms": 43.80349565358104,
+            "memory_peak_bytes": 58912768,
+            "p95_latency_ms": 48.503539996454485,
+            "p99_latency_ms": 59.060547993285596,
+            "request_errors": 0,
+            "runs": 1,
+            "throughput_requests_per_second": 23.68632334735301,
+            "unexpected_rejections": 0
+          },
+          {
+            "accepted_packets": 24,
+            "attempted_packets": 25,
+            "cpu_average_percent": 2.3168414900254297,
+            "database_growth_bytes": 65536,
+            "device_count": 5,
+            "mean_latency_ms": 45.27438261657549,
+            "memory_peak_bytes": 58306560,
+            "p95_latency_ms": 56.65460996096954,
+            "p99_latency_ms": 57.3268780100625,
+            "request_errors": 0,
+            "runs": 1,
+            "throughput_requests_per_second": 22.81197774794269,
+            "unexpected_rejections": 0
+          },
+          {
+            "accepted_packets": 20,
+            "attempted_packets": 21,
+            "cpu_average_percent": 2.3080186947379207,
+            "database_growth_bytes": 65536,
+            "device_count": 10,
+            "mean_latency_ms": 52.99734211171438,
+            "memory_peak_bytes": 58699776,
+            "p95_latency_ms": 66.78803998511287,
+            "p99_latency_ms": 84.46936800610275,
+            "request_errors": 0,
+            "runs": 1,
+            "throughput_requests_per_second": 19.8526536046577,
+            "unexpected_rejections": 0
+          }
+        ],
+        "runs": 3,
+        "shortened_full_duration": false
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 3.327225200016983,
+      "failures": [],
+      "name": "database_growth",
+      "status": "PASS",
+      "summary": {
+        "integrity_failures": 0,
+        "runs": 3,
+        "total_bytes_added": 196608
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 1.344659100053832,
+      "failures": [],
+      "name": "reconnection",
+      "status": "PASS",
+      "summary": {
+        "configured_offline_timeout_seconds": 15,
+        "cycles": 10,
+        "failed": 0,
+        "mean_detection_seconds": 16.106666059995767,
+        "mean_recovery_ms": 41.63968000211753,
+        "p95_recovery_ms": 44.78617000859231,
+        "passed": 10
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 2.094405799987726,
+      "failures": [],
+      "name": "api_benchmarks",
+      "status": "PASS",
+      "summary": {
+        "endpoints": 8,
+        "requests": 160,
+        "rows": [
+          {
+            "endpoint": "/api/devices",
+            "failure_count": 0,
+            "max_ms": 4.2214999557472765,
+            "mean_ms": 2.727274992503226,
+            "median_ms": 2.619149978272617,
+            "method": "GET",
+            "min_ms": 2.320699975825846,
+            "p95_ms": 3.2567749643931174,
+            "p99_ms": 4.028554957476444,
+            "request_count": 20,
+            "requests_per_second": 366.6663621192637,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/patients",
+            "failure_count": 0,
+            "max_ms": 2.253199985716492,
+            "mean_ms": 1.365064992569387,
+            "median_ms": 1.295299967750907,
+            "method": "GET",
+            "min_ms": 1.1211999808438122,
+            "p95_ms": 1.815060022636317,
+            "p99_ms": 2.1655719931004564,
+            "request_count": 20,
+            "requests_per_second": 732.5658525003669,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/history",
+            "failure_count": 0,
+            "max_ms": 1.4513999922201037,
+            "mean_ms": 0.9579899982782081,
+            "median_ms": 0.8876999781932682,
+            "method": "GET",
+            "min_ms": 0.7415000000037253,
+            "p95_ms": 1.3588700065156447,
+            "p99_ms": 1.432893995079212,
+            "request_count": 20,
+            "requests_per_second": 1043.8522341541104,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/packet_logs?limit=50",
+            "failure_count": 0,
+            "max_ms": 3.16909997491166,
+            "mean_ms": 2.7430899965111166,
+            "median_ms": 2.7280500216875225,
+            "method": "GET",
+            "min_ms": 2.3006999981589615,
+            "p95_ms": 3.134804990258999,
+            "p99_ms": 3.162240977981128,
+            "request_count": 20,
+            "requests_per_second": 364.552384818537,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/encounters/P-API-0",
+            "failure_count": 0,
+            "max_ms": 2.870100026484579,
+            "mean_ms": 2.3454299982404336,
+            "median_ms": 2.3481500102207065,
+            "method": "GET",
+            "min_ms": 2.039399987552315,
+            "p95_ms": 2.5736049807164822,
+            "p99_ms": 2.810801017330959,
+            "request_count": 20,
+            "requests_per_second": 426.36105138512363,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/handoff/P-API-0",
+            "failure_count": 0,
+            "max_ms": 2.626800036523491,
+            "mean_ms": 2.434560001711361,
+            "median_ms": 2.4950999941211194,
+            "method": "GET",
+            "min_ms": 2.2102000075392425,
+            "p95_ms": 2.565430011600256,
+            "p99_ms": 2.6145260315388437,
+            "request_count": 20,
+            "requests_per_second": 410.7518398795081,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/vitals",
+            "failure_count": 0,
+            "max_ms": 45.89900001883507,
+            "mean_ms": 40.067015000386164,
+            "median_ms": 39.01510001742281,
+            "method": "POST",
+            "min_ms": 37.098600005265325,
+            "p95_ms": 44.80621499242262,
+            "p99_ms": 45.680443013552576,
+            "request_count": 20,
+            "requests_per_second": 24.958185679426382,
+            "success_count": 20
+          },
+          {
+            "endpoint": "/api/action",
+            "failure_count": 0,
+            "max_ms": 18.670100020244718,
+            "mean_ms": 16.97925501212012,
+            "median_ms": 16.90465002320707,
+            "method": "POST",
+            "min_ms": 15.710499952547252,
+            "p95_ms": 18.57481501356233,
+            "p99_ms": 18.65104301890824,
+            "request_count": 20,
+            "requests_per_second": 58.8953990788277,
+            "success_count": 20
+          }
+        ]
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 0.17742090002866462,
+      "failures": [],
+      "name": "dashboard",
+      "status": "PASS",
+      "summary": {
+        "browser_automation_status": "EXTERNAL_CAPTURE_PRESENT",
+        "console_errors": [],
+        "contract_checks": 22,
+        "contract_checks_failed": 0,
+        "contract_checks_passed": 22,
+        "screenshots_found": 10
+      }
+    },
+    {
+      "blocked": [],
+      "critical": false,
+      "duration_seconds": 1.2816369000356644,
+      "failures": [],
+      "name": "shared_ppg",
+      "status": "PASS",
+      "summary": {
+        "assertions": 20,
+        "assertions_passed": 20,
+        "test_exit_code": 0,
+        "test_runtime_seconds": 1.278160099987872
+      }
+    },
+    {
+      "blocked": [],
+      "critical": true,
+      "duration_seconds": 6.237615999998525,
+      "failures": [
+        "tracked_database: server/edgeer.db"
+      ],
+      "name": "static_checks",
+      "status": "FAIL",
+      "summary": {
+        "cli_help_failures": 0,
+        "compilation_exit_code": 0,
+        "import_failures": 0,
+        "possible_secrets": 0,
+        "python_files": 54,
+        "repository_findings": [
+          {
+            "category": "tracked_database",
+            "file": "server/edgeer.db",
+            "line": null,
+            "severity": "CRITICAL"
+          },
+          {
+            "category": "personal_path",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 54,
+            "severity": "WARNING"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 61,
+            "severity": "INFO"
+          },
+          {
+            "category": "personal_path",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 65,
+            "severity": "WARNING"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 68,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 69,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 70,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 71,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 72,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "RELEASE_CANDIDATE.md",
+            "line": 73,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "edge-node\\config.py",
+            "line": 6,
+            "severity": "INFO"
+          },
+          {
+            "category": "personal_path",
+            "file": "server\\research\\rr_ppg\\README.md",
+            "line": 68,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "server\\research\\rr_ppg\\README.md",
+            "line": 86,
+            "severity": "WARNING"
+          }
+        ],
+        "tracked_databases": 1,
+        "tracked_files": 61,
+        "tracked_pyc_files": 0,
+        "tracked_venv_files": 0
+      }
+    }
+  ],
+  "mode": "quick",
+  "packet_validation": {
+    "cases_without_clear_rejection_reason": 0,
+    "failed": 0,
+    "false_acceptances": 0,
+    "false_rejections": 0,
+    "passed": 45,
+    "rule_handling_accuracy_percent": 100.0,
+    "total_cases": 45
+  },
+  "plots": [
+    "latency_vs_device_count.png",
+    "throughput_vs_device_count.png",
+    "cpu_vs_device_count.png",
+    "memory_vs_device_count.png",
+    "database_growth_vs_packets.png",
+    "packet_validation_outcomes.png",
+    "reconnection_times.png"
+  ],
+  "ready_for_physical_validation": true,
+  "ready_for_v0_9_release_candidate": false
+}

@@ -1,0 +1,9 @@
+table,row_count
+devices,2
+encounters,2
+latest_patient_state,2
+packet_logs,2
+patient_events,5
+patient_profiles,2
+recent_vitals,2
+recheck_timers,1

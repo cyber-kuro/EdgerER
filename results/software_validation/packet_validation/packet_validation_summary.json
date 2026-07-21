@@ -1,0 +1,9 @@
+{
+  "cases_without_clear_rejection_reason": 0,
+  "failed": 0,
+  "false_acceptances": 0,
+  "false_rejections": 0,
+  "passed": 45,
+  "rule_handling_accuracy_percent": 100.0,
+  "total_cases": 45
+}

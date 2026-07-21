@@ -1,0 +1,171 @@
+Commit: 3290b7bb9a949d3e1a9f25914cf924916b23cc5b
+Branch: main
+Dirty: True
+
+git status --short:
+D .gitignore.txt
+AM RELEASE_CANDIDATE.md
+M  edge-node/README.md
+D  edge-node/__pycache__/config.cpython-311.pyc
+D  edge-node/__pycache__/config.cpython-312.pyc
+D  edge-node/__pycache__/main.cpython-311.pyc
+D  edge-node/__pycache__/main.cpython-312.pyc
+D  edge-node/acquisition/__pycache__/__init__.cpython-311.pyc
+D  edge-node/acquisition/__pycache__/__init__.cpython-312.pyc
+D  edge-node/acquisition/__pycache__/ppg_stream.cpython-311.pyc
+D  edge-node/acquisition/__pycache__/ppg_stream.cpython-312.pyc
+D  edge-node/alerts/__pycache__/buzzer.cpython-311.pyc
+D  edge-node/alerts/__pycache__/buzzer.cpython-312.pyc
+D  edge-node/alerts/__pycache__/leds.cpython-311.pyc
+D  edge-node/alerts/__pycache__/leds.cpython-312.pyc
+D  edge-node/alerts/__pycache__/local_alerts.cpython-311.pyc
+D  edge-node/alerts/__pycache__/local_alerts.cpython-312.pyc
+D  edge-node/alerts/__pycache__/local_alerts.cpython-313.pyc
+D  edge-node/backend/__pycache__/config.cpython-311.pyc
+D  edge-node/backend/__pycache__/config.cpython-312.pyc
+D  edge-node/backend/__pycache__/sender.cpython-311.pyc
+D  edge-node/backend/__pycache__/sender.cpython-312.pyc
+M  edge-node/config.py
+M  edge-node/docs/SHARED_PPG_ARCHITECTURE.md
+M  edge-node/main.py
+D  edge-node/processing/__pycache__/__init__.cpython-311.pyc
+D  edge-node/processing/__pycache__/__init__.cpython-312.pyc
+D  edge-node/processing/__pycache__/hr_spo2.cpython-312.pyc
+D  edge-node/processing/__pycache__/ppg_pipeline.cpython-312.pyc
+D  edge-node/processing/__pycache__/ppg_quality.cpython-311.pyc
+D  edge-node/processing/__pycache__/ppg_quality.cpython-312.pyc
+D  edge-node/processing/__pycache__/respiratory_rate.cpython-311.pyc
+D  edge-node/processing/__pycache__/respiratory_rate.cpython-312.pyc
+D  edge-node/scripts/__pycache__/__init__.cpython-311.pyc
+D  edge-node/scripts/__pycache__/__init__.cpython-312.pyc
+D  edge-node/scripts/__pycache__/analyze_ppg_csv.cpython-311.pyc
+D  edge-node/scripts/__pycache__/analyze_ppg_csv.cpython-312.pyc
+D  edge-node/scripts/__pycache__/estimate_rr_from_ppg_csv.cpython-311.pyc
+D  edge-node/scripts/__pycache__/estimate_rr_from_ppg_csv.cpython-312.pyc
+D  edge-node/scripts/__pycache__/record_ppg_csv.cpython-311.pyc
+D  edge-node/scripts/__pycache__/record_ppg_csv.cpython-312.pyc
+D  edge-node/scripts/__pycache__/rr_validation_session.cpython-311.pyc
+D  edge-node/scripts/__pycache__/rr_validation_session.cpython-312.pyc
+D  edge-node/scripts/__pycache__/test_live_rr_packet.cpython-311.pyc
+D  edge-node/scripts/__pycache__/test_live_rr_packet.cpython-312.pyc
+D  edge-node/scripts/__pycache__/validate_rr_recordings.cpython-311.pyc
+D  edge-node/scripts/__pycache__/validate_rr_recordings.cpython-312.pyc
+D  edge-node/sensors/__pycache__/max30102.cpython-311.pyc
+D  edge-node/sensors/__pycache__/max30102.cpython-312.pyc
+D  edge-node/sensors/__pycache__/max30102.cpython-313.pyc
+D  edge-node/sensors/__pycache__/mlx90614.cpython-311.pyc
+D  edge-node/sensors/__pycache__/mlx90614.cpython-312.pyc
+D  edge-node/sensors/__pycache__/mlx90614.cpython-313.pyc
+D  edge-node/sensors/__pycache__/mpu6050.cpython-313.pyc
+D  edge-node/sensors/__pycache__/mpu6050_sensor.cpython-311.pyc
+D  edge-node/sensors/__pycache__/mpu6050_sensor.cpython-312.pyc
+D  edge-node/sensors/__pycache__/mpu6050_sensor.cpython-313.pyc
+D  edge-node/tests/__pycache__/test_hr_spo2.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_live_rr_packet.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_live_rr_packet.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_main_rr_integration.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_main_rr_integration.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_ppg_buffer.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_ppg_buffer.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_ppg_pipeline.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_ppg_quality.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_ppg_quality.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_respiratory_rate.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_respiratory_rate.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_rr_validation.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_rr_validation.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_rr_validation_session.cpython-311.pyc
+D  edge-node/tests/__pycache__/test_rr_validation_session.cpython-312.pyc
+D  edge-node/tests/__pycache__/test_script_imports.cpython-312.pyc
+A  edge-node/tests/test_rr_local_alerts.py
+D  edge-node/utils/__pycache__/filters.cpython-311.pyc
+D  edge-node/utils/__pycache__/filters.cpython-312.pyc
+D  edge-node/utils/__pycache__/risk_engine.cpython-311.pyc
+D  edge-node/utils/__pycache__/risk_engine.cpython-312.pyc
+D  edge-node/utils/__pycache__/risk_engine.cpython-313.pyc
+M  edge-node/utils/risk_engine.py
+D  server/__pycache__/database.cpython-311.pyc
+D  server/__pycache__/models.cpython-311.pyc
+D  server/__pycache__/packet_validation.cpython-311.pyc
+D  server/__pycache__/services.cpython-311.pyc
+D  server/__pycache__/state.cpython-311.pyc
+MM server/database.py
+MM server/edgeer.db
+M  server/models.py
+M  server/packet_validation.py
+A  server/requirements.txt
+MM server/server.py
+MM server/services.py
+M  server/simulate_nodes.py
+MM server/static/dashboard.js
+MM server/static/styles.css
+MM server/templates/index.html
+A  server/tests/test_release_candidate.py
+M  server/tests/test_rr_display.py
+?? .gitignore
+?? results/
+?? server/tests/test_device_retirement.py
+?? tools/
+
+Tracked files:
+.gitignore.txt
+RELEASE_CANDIDATE.md
+edge-node/README.md
+edge-node/acquisition/__init__.py
+edge-node/acquisition/ppg_stream.py
+edge-node/alerts/buzzer.py
+edge-node/alerts/leds.py
+edge-node/alerts/local_alerts.py
+edge-node/backend/config.py
+edge-node/backend/sender.py
+edge-node/config.py
+edge-node/docs/SHARED_PPG_ARCHITECTURE.md
+edge-node/main.py
+edge-node/plots/.gitkeep
+edge-node/processing/__init__.py
+edge-node/processing/hr_spo2.py
+edge-node/processing/ppg_pipeline.py
+edge-node/processing/ppg_quality.py
+edge-node/processing/respiratory_rate.py
+edge-node/requirements.txt
+edge-node/scripts/__init__.py
+edge-node/scripts/analyze_ppg_csv.py
+edge-node/scripts/estimate_rr_from_ppg_csv.py
+edge-node/scripts/record_ppg_csv.py
+edge-node/scripts/rr_validation_session.py
+edge-node/scripts/test_live_rr_packet.py
+edge-node/scripts/validate_rr_recordings.py
+edge-node/sensors/max30102.py
+edge-node/sensors/mlx90614.py
+edge-node/sensors/mpu6050_sensor.py
+edge-node/tests/test_hr_spo2.py
+edge-node/tests/test_live_rr_packet.py
+edge-node/tests/test_main_rr_integration.py
+edge-node/tests/test_ppg_buffer.py
+edge-node/tests/test_ppg_pipeline.py
+edge-node/tests/test_ppg_quality.py
+edge-node/tests/test_respiratory_rate.py
+edge-node/tests/test_rr_local_alerts.py
+edge-node/tests/test_rr_validation.py
+edge-node/tests/test_rr_validation_session.py
+edge-node/tests/test_script_imports.py
+edge-node/utils/filters.py
+edge-node/utils/risk_engine.py
+server/database.py
+server/edgeer.db
+server/models.py
+server/packet_validation.py
+server/requirements.txt
+server/research/rr_ppg/README.md
+server/research/rr_ppg/evaluate_bidmc_rr.py
+server/research/rr_ppg/rr_algorithm.py
+server/research/rr_ppg/sample_format.md
+server/server.py
+server/services.py
+server/simulate_nodes.py
+server/state.py
+server/static/dashboard.js
+server/static/styles.css
+server/templates/index.html
+server/tests/test_release_candidate.py
+server/tests/test_rr_display.py

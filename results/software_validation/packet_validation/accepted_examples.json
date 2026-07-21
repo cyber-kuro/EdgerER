@@ -1,0 +1,321 @@
+[
+  {
+    "case": "valid packet",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-1-VALID",
+      "device_send_time": "2026-07-21T03:21:52.324120+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-1-VALID",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.324120+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "valid GOOD RR",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-2-GOODRR",
+      "device_send_time": "2026-07-21T03:21:52.392588+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-2-GOODRR",
+      "reasons": [],
+      "resp_rate_bpm": 16.0,
+      "rr_confidence": 0.9,
+      "rr_quality": "GOOD",
+      "rr_source": "PPG",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.392588+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "valid MODERATE RR",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-3-MODERATERR",
+      "device_send_time": "2026-07-21T03:21:52.466379+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-3-MODERATERR",
+      "reasons": [],
+      "resp_rate_bpm": 18.0,
+      "rr_confidence": 0.7,
+      "rr_quality": "MODERATE",
+      "rr_source": "PPG",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.466379+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "null RR LOW_CONFIDENCE",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-4-LOWCONFIDENCE",
+      "device_send_time": "2026-07-21T03:21:52.531389+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-4-LOWCONFIDENCE",
+      "reasons": [],
+      "resp_rate_bpm": null,
+      "rr_confidence": 0.2,
+      "rr_quality": "LOW_CONFIDENCE",
+      "rr_source": "PPG",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.531389+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "null RR UNAVAILABLE",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-5-UNAVAILABLE",
+      "device_send_time": "2026-07-21T03:21:52.596089+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-5-UNAVAILABLE",
+      "reasons": [],
+      "resp_rate_bpm": null,
+      "rr_confidence": null,
+      "rr_quality": "UNAVAILABLE",
+      "rr_source": "PPG",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.596089+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "duplicate setup",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-DUP",
+      "device_send_time": "2026-07-21T03:21:52.967236+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 7,
+      "patient_id": "P-DUP",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.967236+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "duplicate sequence with new timestamp",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-DUP",
+      "device_send_time": "2026-07-21T03:21:53.073744+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 7,
+      "patient_id": "P-DUP",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.073744+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "out-of-order sequence",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-DUP",
+      "device_send_time": "2026-07-21T03:21:53.121982+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 3,
+      "patient_id": "P-DUP",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.121982+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "unknown device auto-registration",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-32-UNKNOWNDEVICE",
+      "device_send_time": "2026-07-21T03:21:53.167759+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-32-UNKNOWNDEVICE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.167759+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "packet after valid reassignment",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-REASSIGN-B",
+      "device_send_time": "2026-07-21T03:21:53.694916+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-REASSIGN-A",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.694916+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "packet after reconnection",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-REASSIGN-B",
+      "device_send_time": "2026-07-21T03:21:53.759559+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 2,
+      "patient_id": "P-REASSIGN-A",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.759559+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  },
+  {
+    "case": "extra unknown fields",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-41-EXTRAFIELDS",
+      "device_send_time": "2026-07-21T03:21:53.815647+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "future_extension": {
+        "safe": true
+      },
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-41-EXTRAFIELDS",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:53.815647+00:00"
+    },
+    "response": {
+      "accepted": true,
+      "logged": true,
+      "ok": true,
+      "received": true
+    }
+  }
+]

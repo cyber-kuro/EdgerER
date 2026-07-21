@@ -1,0 +1,56 @@
+{
+  "device_counts": [
+    1,
+    5,
+    10
+  ],
+  "duration_seconds_per_run": 1.0,
+  "mode": "quick",
+  "rows": [
+    {
+      "accepted_packets": 24,
+      "attempted_packets": 25,
+      "cpu_average_percent": 2.4056422149655403,
+      "database_growth_bytes": 65536,
+      "device_count": 1,
+      "mean_latency_ms": 43.80349565358104,
+      "memory_peak_bytes": 58912768,
+      "p95_latency_ms": 48.503539996454485,
+      "p99_latency_ms": 59.060547993285596,
+      "request_errors": 0,
+      "runs": 1,
+      "throughput_requests_per_second": 23.68632334735301,
+      "unexpected_rejections": 0
+    },
+    {
+      "accepted_packets": 24,
+      "attempted_packets": 25,
+      "cpu_average_percent": 2.3168414900254297,
+      "database_growth_bytes": 65536,
+      "device_count": 5,
+      "mean_latency_ms": 45.27438261657549,
+      "memory_peak_bytes": 58306560,
+      "p95_latency_ms": 56.65460996096954,
+      "p99_latency_ms": 57.3268780100625,
+      "request_errors": 0,
+      "runs": 1,
+      "throughput_requests_per_second": 22.81197774794269,
+      "unexpected_rejections": 0
+    },
+    {
+      "accepted_packets": 20,
+      "attempted_packets": 21,
+      "cpu_average_percent": 2.3080186947379207,
+      "database_growth_bytes": 65536,
+      "device_count": 10,
+      "mean_latency_ms": 52.99734211171438,
+      "memory_peak_bytes": 58699776,
+      "p95_latency_ms": 66.78803998511287,
+      "p99_latency_ms": 84.46936800610275,
+      "request_errors": 0,
+      "runs": 1,
+      "throughput_requests_per_second": 19.8526536046577,
+      "unexpected_rejections": 0
+    }
+  ]
+}

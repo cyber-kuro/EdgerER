@@ -1,0 +1,22 @@
+{
+  "PPG quality buffered tests": true,
+  "buffered HR SpO2 test": true,
+  "buffered RR estimator tests": true,
+  "hardware-independent script imports": true,
+  "independent snapshot test": true,
+  "insufficient samples unavailable": true,
+  "invalid temperature sanitized": true,
+  "local RR severity tests": true,
+  "low confidence RR null": true,
+  "no FIFO reset in main": true,
+  "no legacy direct FIFO call in main": true,
+  "one MAX30102 construction in main": true,
+  "one PPGStream construction in main": true,
+  "packet metadata preserved": true,
+  "pipeline exposes freshness": true,
+  "recoverable estimator exception": true,
+  "single stream regression test": true,
+  "stale HR SpO2 RR withheld": true,
+  "startup unavailable": true,
+  "usable RR numeric": true
+}

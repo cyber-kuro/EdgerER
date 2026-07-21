@@ -1,0 +1,9 @@
+method,endpoint,response_size_mean_bytes,response_size_max_bytes
+GET,/api/devices,7881.0,7881
+GET,/api/patients,7506.0,7506
+GET,/api/history,4546.0,4546
+GET,/api/packet_logs?limit=50,9263.0,9263
+GET,/api/encounters/P-API-0,301.0,301
+GET,/api/handoff/P-API-0,1172.0,1172
+POST,/api/vitals,57.0,57
+POST,/api/action,158.0,158

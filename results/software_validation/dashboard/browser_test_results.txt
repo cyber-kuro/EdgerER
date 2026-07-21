@@ -1,0 +1,22 @@
+PASS: registration modal
+PASS: device dropdown
+PASS: empty device state
+PASS: priority empty state
+PASS: error state
+PASS: loading state
+PASS: alert sound control
+PASS: prototype disclaimer
+PASS: retired filter
+PASS: remove modal
+PASS: RR column
+PASS: status column
+PASS: NO DATA style
+PASS: OFFLINE style
+PASS: responsive rules
+PASS: dashboard renders
+PASS: offline device excluded from dropdown eligibility
+PASS: registration succeeds
+PASS: invalid registration structured error
+PASS: RR separate from status
+PASS: priority escalation API
+PASS: handoff renders

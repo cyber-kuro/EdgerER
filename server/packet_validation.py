@@ -1,8 +1,26 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import math
+from typing import Any, Optional
+
+from models import (
+    MAX_DEVICE_CLOCK_LEAD_SECONDS,
+    MAX_DEVICE_PACKET_AGE_SECONDS,
+    RR_CONFIDENCE_ELIGIBILITY_GATE,
+)
 
 
 VALIDATION_VERSION = "packet_validation_v1"
+
+RELIABLE_RR_QUALITIES = {"GOOD", "MODERATE"}
+RR_QUALITIES = {
+    "GOOD",
+    "MODERATE",
+    "LOW_CONFIDENCE",
+    "BAD_SIGNAL",
+    "BAD_TIMING",
+    "UNAVAILABLE",
+}
 
 NUMERIC_RANGES = {
     "heart_rate_bpm": (20, 250),
@@ -46,7 +64,30 @@ def parsed_identifier(packet, field_name):
     return parsed or None
 
 
-def validate_packet(packet):
+def parse_packet_datetime(value: Any) -> Optional[datetime]:
+    if not isinstance(value, str) or not value.strip():
+        return None
+
+    candidate = value.strip()
+    if candidate.endswith("Z"):
+        candidate = f"{candidate[:-1]}+00:00"
+
+    try:
+        parsed = datetime.fromisoformat(candidate)
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        parsed = parsed.astimezone()
+
+    return parsed.astimezone(timezone.utc)
+
+
+def validate_packet(
+    packet: Any,
+    *,
+    now_utc: Optional[datetime] = None,
+) -> PacketValidationResult:
     errors = []
     warnings = []
 
@@ -74,6 +115,41 @@ def validate_packet(packet):
         if value is not None and not isinstance(value, str):
             errors.append(f"{field_name} must be a string or null")
 
+    for field_name in ("device_type", "firmware_version", "device_send_time"):
+        value = packet.get(field_name)
+        if value is not None and not isinstance(value, str):
+            errors.append(f"{field_name} must be a string or null")
+
+    packet_sequence = packet.get("packet_sequence")
+    if packet_sequence is not None and (
+        isinstance(packet_sequence, bool)
+        or not isinstance(packet_sequence, int)
+        or packet_sequence < 0
+    ):
+        errors.append("packet_sequence must be a non-negative integer or null")
+
+    device_send_time = packet.get("device_send_time")
+    if isinstance(device_send_time, str):
+        parsed_send_time = parse_packet_datetime(device_send_time)
+        if parsed_send_time is None:
+            errors.append("device_send_time must be an ISO-8601 timestamp")
+        else:
+            reference = now_utc or datetime.now(timezone.utc)
+            if reference.tzinfo is None:
+                reference = reference.replace(tzinfo=timezone.utc)
+            reference = reference.astimezone(timezone.utc)
+            age_seconds = (reference - parsed_send_time).total_seconds()
+            if age_seconds > MAX_DEVICE_PACKET_AGE_SECONDS:
+                errors.append(
+                    "device_send_time is stale "
+                    f"(older than {MAX_DEVICE_PACKET_AGE_SECONDS} seconds)"
+                )
+            elif age_seconds < -MAX_DEVICE_CLOCK_LEAD_SECONDS:
+                errors.append(
+                    "device_send_time is too far in the future "
+                    f"(more than {MAX_DEVICE_CLOCK_LEAD_SECONDS} seconds)"
+                )
+
     finger_detected = packet.get("finger_detected")
     if finger_detected is not None and not isinstance(finger_detected, bool):
         errors.append("finger_detected must be boolean or null")
@@ -84,6 +160,22 @@ def validate_packet(packet):
         or any(not isinstance(reason, str) for reason in reasons)
     ):
         errors.append("reasons must be a list of strings or null")
+
+    rr_source = packet.get("rr_source")
+    if rr_source is not None and not isinstance(rr_source, str):
+        errors.append("rr_source must be a string or null")
+
+    rr_quality_value = packet.get("rr_quality")
+    rr_quality = None
+    if rr_quality_value is not None:
+        if not isinstance(rr_quality_value, str):
+            errors.append("rr_quality must be a string or null")
+        else:
+            rr_quality = rr_quality_value.strip().upper()
+            if rr_quality not in RR_QUALITIES:
+                errors.append(
+                    "rr_quality must be one of " + ", ".join(sorted(RR_QUALITIES))
+                )
 
     for field_name, (minimum, maximum) in NUMERIC_RANGES.items():
         value = packet.get(field_name)
@@ -103,6 +195,37 @@ def validate_packet(packet):
             errors.append(
                 f"{field_name} must be between {minimum} and {maximum}"
             )
+
+    resp_rate = packet.get("resp_rate_bpm")
+    rr_confidence = packet.get("rr_confidence")
+    has_numeric_rr = (
+        isinstance(resp_rate, (int, float))
+        and not isinstance(resp_rate, bool)
+        and math.isfinite(resp_rate)
+    )
+    has_numeric_confidence = (
+        isinstance(rr_confidence, (int, float))
+        and not isinstance(rr_confidence, bool)
+        and math.isfinite(rr_confidence)
+    )
+
+    if has_numeric_rr:
+        if rr_quality not in RELIABLE_RR_QUALITIES:
+            errors.append(
+                "resp_rate_bpm must be withheld (null) unless rr_quality is "
+                "GOOD or MODERATE"
+            )
+        if not has_numeric_confidence:
+            errors.append("numeric resp_rate_bpm requires numeric rr_confidence")
+        elif rr_confidence < RR_CONFIDENCE_ELIGIBILITY_GATE:
+            errors.append(
+                "numeric resp_rate_bpm requires rr_confidence at or above "
+                f"{RR_CONFIDENCE_ELIGIBILITY_GATE:.2f}"
+            )
+    elif resp_rate is None and rr_quality in RELIABLE_RR_QUALITIES:
+        errors.append(
+            "rr_quality GOOD or MODERATE requires numeric resp_rate_bpm"
+        )
 
     if parsed_identifier(packet, "device_type") is None:
         warnings.append("missing optional device_type")

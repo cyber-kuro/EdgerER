@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import sqlite3
 import uuid
@@ -9,7 +10,12 @@ import state
 from models import DEVICE_STATUSES, MAX_EVENTS_PER_PATIENT, MAX_HISTORY_PACKETS
 
 
-DATABASE_PATH = Path(__file__).resolve().with_name("edgeer.db")
+DATABASE_PATH = Path(
+    os.environ.get(
+        "EDGEER_DATABASE_PATH",
+        str(Path(__file__).resolve().with_name("edgeer.db")),
+    )
+)
 
 
 def utc_now_string():
@@ -426,6 +432,11 @@ def initialize_database():
                 last_seen TEXT,
                 firmware_version TEXT NOT NULL DEFAULT '',
                 location TEXT NOT NULL DEFAULT '',
+                last_packet_sequence INTEGER,
+                last_device_send_time TEXT,
+                is_active INTEGER NOT NULL DEFAULT 1,
+                retired_at TEXT,
+                retired_reason TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             );
@@ -451,6 +462,16 @@ def initialize_database():
         ensure_column(connection, "packet_logs", "rr_confidence", "REAL")
         ensure_column(connection, "packet_logs", "rr_quality", "TEXT")
         ensure_column(connection, "recheck_timers", "encounter_id", "TEXT")
+        ensure_column(connection, "devices", "last_packet_sequence", "INTEGER")
+        ensure_column(connection, "devices", "last_device_send_time", "TEXT")
+        ensure_column(
+            connection,
+            "devices",
+            "is_active",
+            "INTEGER NOT NULL DEFAULT 1",
+        )
+        ensure_column(connection, "devices", "retired_at", "TEXT")
+        ensure_column(connection, "devices", "retired_reason", "TEXT")
         ensure_column(
             connection,
             "encounters",
@@ -469,6 +490,10 @@ def initialize_database():
             CREATE UNIQUE INDEX IF NOT EXISTS idx_encounters_one_active_patient
             ON encounters (patient_id)
             WHERE active = 1;
+
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_encounters_one_active_device
+            ON encounters (assigned_device_id)
+            WHERE active = 1 AND assigned_device_id <> '';
 
             CREATE INDEX IF NOT EXISTS idx_patient_events_encounter
             ON patient_events (encounter_id, id);
@@ -557,6 +582,11 @@ def load_state():
                 "last_seen": row["last_seen"],
                 "firmware_version": row["firmware_version"] or "",
                 "location": row["location"] or "",
+                "last_packet_sequence": row["last_packet_sequence"],
+                "last_device_send_time": row["last_device_send_time"],
+                "is_active": bool(row["is_active"]),
+                "retired_at": row["retired_at"],
+                "retired_reason": row["retired_reason"],
                 "created_at": row["created_at"],
                 "updated_at": row["updated_at"],
             }
@@ -828,10 +858,15 @@ def save_device(device):
                 last_seen,
                 firmware_version,
                 location,
+                last_packet_sequence,
+                last_device_send_time,
+                is_active,
+                retired_at,
+                retired_reason,
                 created_at,
                 updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(device_id) DO UPDATE SET
                 device_type = excluded.device_type,
                 assigned_patient_id = excluded.assigned_patient_id,
@@ -842,6 +877,11 @@ def save_device(device):
                 last_seen = excluded.last_seen,
                 firmware_version = excluded.firmware_version,
                 location = excluded.location,
+                last_packet_sequence = excluded.last_packet_sequence,
+                last_device_send_time = excluded.last_device_send_time,
+                is_active = excluded.is_active,
+                retired_at = excluded.retired_at,
+                retired_reason = excluded.retired_reason,
                 updated_at = excluded.updated_at
             """,
             (
@@ -855,10 +895,73 @@ def save_device(device):
                 device.get("last_seen"),
                 device.get("firmware_version") or "",
                 device.get("location") or "",
+                device.get("last_packet_sequence"),
+                device.get("last_device_send_time"),
+                int(bool(device.get("is_active", True))),
+                device.get("retired_at"),
+                device.get("retired_reason"),
                 device["created_at"],
                 device["updated_at"],
             ),
         )
+
+
+def device_dependency_counts(device_id):
+    with connect() as connection:
+        row = connection.execute(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM packet_logs
+                 WHERE parsed_device_id = ?) AS packet_logs,
+                (SELECT COUNT(*) FROM encounters
+                 WHERE assigned_device_id = ?) AS encounters,
+                (SELECT COUNT(*) FROM patient_profiles
+                 WHERE assigned_device_id = ?) AS patient_profiles,
+                (SELECT COUNT(*) FROM latest_patient_state
+                 WHERE device_id = ?) AS latest_patient_state
+            """,
+            (device_id, device_id, device_id, device_id),
+        ).fetchone()
+
+    return {
+        "packet_logs": row["packet_logs"],
+        "encounters": row["encounters"],
+        "patient_profiles": row["patient_profiles"],
+        "latest_patient_state": row["latest_patient_state"],
+    }
+
+
+def device_ids_with_historical_dependencies():
+    with connect() as connection:
+        rows = connection.execute(
+            """
+            SELECT parsed_device_id AS device_id
+            FROM packet_logs
+            WHERE parsed_device_id IS NOT NULL AND parsed_device_id <> ''
+            UNION
+            SELECT assigned_device_id
+            FROM encounters
+            WHERE assigned_device_id <> ''
+            UNION
+            SELECT assigned_device_id
+            FROM patient_profiles
+            WHERE assigned_device_id <> ''
+            UNION
+            SELECT device_id
+            FROM latest_patient_state
+            WHERE device_id <> ''
+            """
+        ).fetchall()
+    return {row["device_id"] for row in rows}
+
+
+def delete_device(device_id):
+    with connect() as connection:
+        cursor = connection.execute(
+            "DELETE FROM devices WHERE device_id = ?",
+            (device_id,),
+        )
+    return cursor.rowcount > 0
 
 
 def get_encounters(patient_id):

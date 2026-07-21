@@ -1,0 +1,4 @@
+device_count,run,scenario,classification,expected_rejections,observed_rejections,pass
+1,1,exact_duplicate,intentional_rejection,1,1,True
+5,1,exact_duplicate,intentional_rejection,1,1,True
+10,1,exact_duplicate,intentional_rejection,1,1,True

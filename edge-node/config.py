@@ -33,6 +33,14 @@ RR_MIN_SAMPLES = 1_000
 RR_REFRESH_INTERVAL_SEC = 300.0
 RR_STALE_AFTER_SEC = 360.0
 
+# Prototype-only demonstration thresholds for conservative local indication.
+# These are engineering configuration values, not validated clinical criteria.
+# An eligible PPG-derived RR outside this deliberately wide range may raise a
+# GREEN local state to YELLOW only; it can never create a severe alert.
+RR_DEMO_MIN_BPM = 8.0
+RR_DEMO_MAX_BPM = 30.0
+RR_MIN_CONFIDENCE = 0.50
+
 # Before a cache has its first result, retry this often without running an
 # estimator until the required buffered duration/sample count is available.
 PPG_WARMUP_RETRY_INTERVAL_SEC = 5.0

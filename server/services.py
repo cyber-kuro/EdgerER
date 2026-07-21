@@ -1,10 +1,14 @@
 from datetime import datetime, timezone
+from functools import wraps
 import json
+import threading
 import time
+from typing import Any, Callable, Optional
 
 import database
 from packet_validation import (
     VALIDATION_VERSION,
+    parse_packet_datetime,
     parsed_identifier,
     validate_packet,
 )
@@ -20,6 +24,7 @@ from models import (
     DEVICE_STATUS_AVAILABLE,
     DEVICE_STATUS_NEEDS_CLEANING,
     DEVICE_STATUS_OFFLINE,
+    DEVICE_STATUS_SENSOR_FAULT,
     MAX_EVENTS_PER_PATIENT,
     MAX_HISTORY_PACKETS,
     OFFLINE_AFTER_SECONDS,
@@ -31,6 +36,34 @@ from models import (
     STATUS_ORANGE,
     TREND_ELIGIBLE_STATUSES,
 )
+
+
+_WORKFLOW_LOCK = threading.RLock()
+
+
+def synchronized(function: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(function)
+    def guarded(*args, **kwargs):
+        with _WORKFLOW_LOCK:
+            return function(*args, **kwargs)
+
+    return guarded
+
+
+def service_error(
+    code: str,
+    message: str,
+    *,
+    field: Optional[str] = None,
+) -> dict[str, Any]:
+    result = {
+        "ok": False,
+        "code": code,
+        "error": message,
+    }
+    if field is not None:
+        result["field"] = field
+    return result
 
 
 def format_duration(seconds):
@@ -57,7 +90,7 @@ def combine_messages(*messages):
 RELIABLE_RR_QUALITIES = {"GOOD", "MODERATE"}
 
 
-def format_research_rr_handoff(packet):
+def format_research_rr_handoff(packet, *, rr_fresh=True):
     rr_fields = (
         "resp_rate_bpm",
         "rr_source",
@@ -77,10 +110,20 @@ def format_research_rr_handoff(packet):
         else "unavailable"
     )
 
-    if resp_rate is not None and quality in RELIABLE_RR_QUALITIES:
+    if (
+        resp_rate is not None
+        and quality in RELIABLE_RR_QUALITIES
+        and rr_fresh
+    ):
         return (
             f"Respiratory rate: {resp_rate:.1f} breaths/min, "
             f"source {source}, quality {quality}, confidence {confidence_text}"
+        )
+
+    if resp_rate is not None and not rr_fresh:
+        return (
+            f"Respiratory rate: withheld (stale), source {source}, "
+            f"quality {quality}, confidence {confidence_text}"
         )
 
     return (
@@ -102,15 +145,21 @@ def new_device(device_id, *, device_type="UNKNOWN", firmware_version="", locatio
         "last_seen": None,
         "firmware_version": firmware_version or "",
         "location": location or "",
+        "last_packet_sequence": None,
+        "last_device_send_time": None,
+        "is_active": True,
+        "retired_at": None,
+        "retired_reason": None,
         "created_at": now,
         "updated_at": now,
     }
 
 
+@synchronized
 def register_device(device_profile):
     device_id = str(device_profile.get("device_id") or "").strip()
     if not device_id:
-        return {"ok": False, "error": "missing device_id"}
+        return service_error("MISSING_DEVICE_ID", "missing device_id", field="device_id")
 
     device = state.devices.get(device_id)
     created = device is None
@@ -124,6 +173,12 @@ def register_device(device_profile):
         )
         state.devices[device_id] = device
     else:
+        if not device.get("is_active", True):
+            return service_error(
+                "DEVICE_RETIRED",
+                f"device {device_id} is retired and must be restored before use",
+                field="device_id",
+            )
         device_type = device_profile.get("device_type")
         firmware_version = device_profile.get("firmware_version")
         location = device_profile.get("location")
@@ -140,19 +195,69 @@ def register_device(device_profile):
     return {"ok": True, "created": created, "device": device.copy()}
 
 
-def device_assignment_conflict(device_id, patient_id, encounter_id=None):
-    device = state.devices.get(device_id)
+def device_last_seen_age_seconds(
+    device: dict[str, Any],
+    *,
+    now_utc: Optional[datetime] = None,
+) -> Optional[int]:
+    last_seen = parse_packet_datetime(device.get("last_seen"))
+    if last_seen is None:
+        return None
 
-    if device is not None:
-        assigned_encounter_id = device.get("assigned_encounter_id")
-        if assigned_encounter_id and assigned_encounter_id != encounter_id:
-            assigned_encounter = state.encounters.get(assigned_encounter_id)
-            if assigned_encounter and assigned_encounter.get("active"):
-                return (
-                    f"device {device_id} is assigned to active patient "
-                    f"{device.get('assigned_patient_id')} encounter "
-                    f"{assigned_encounter_id}"
-                )
+    reference = now_utc or datetime.now(timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    return max(0, int((reference.astimezone(timezone.utc) - last_seen).total_seconds()))
+
+
+def device_is_online(
+    device: dict[str, Any],
+    *,
+    now_utc: Optional[datetime] = None,
+) -> bool:
+    age = device_last_seen_age_seconds(device, now_utc=now_utc)
+    return age is not None and age <= OFFLINE_AFTER_SECONDS
+
+
+def device_assignment_error(
+    device_id: str,
+    patient_id: str,
+    encounter_id: Optional[str] = None,
+    *,
+    assignment_source: str = "manual",
+) -> Optional[dict[str, Any]]:
+    device = state.devices.get(device_id)
+    if device is None:
+        return service_error(
+            "UNKNOWN_DEVICE",
+            f"device {device_id} is not registered",
+            field="assigned_device_id",
+        )
+
+    if not device.get("is_active", True):
+        return service_error(
+            "DEVICE_RETIRED",
+            f"device {device_id} is retired",
+            field="assigned_device_id",
+        )
+
+    assigned_encounter_id = device.get("assigned_encounter_id")
+    same_assignment = (
+        encounter_id is not None
+        and assigned_encounter_id == encounter_id
+        and device.get("assigned_patient_id") == patient_id
+    )
+
+    if assigned_encounter_id and not same_assignment:
+        assigned_encounter = state.encounters.get(assigned_encounter_id)
+        if assigned_encounter and assigned_encounter.get("active"):
+            return service_error(
+                "DEVICE_ASSIGNED",
+                f"device {device_id} is assigned to active patient "
+                f"{device.get('assigned_patient_id')} encounter "
+                f"{assigned_encounter_id}",
+                field="assigned_device_id",
+            )
 
     if encounter_id is not None:
         encounter = state.encounters.get(encounter_id)
@@ -160,32 +265,98 @@ def device_assignment_conflict(device_id, patient_id, encounter_id=None):
             encounter.get("assigned_device_id", "") if encounter else ""
         )
         if assigned_device_id and assigned_device_id != device_id:
-            return (
+            return service_error(
+                "ENCOUNTER_DEVICE_ASSIGNED",
                 f"patient {patient_id} encounter {encounter_id} is already "
-                f"assigned to device {assigned_device_id}"
+                f"assigned to device {assigned_device_id}",
+                field="assigned_device_id",
             )
+
+    status = device.get("status")
+    if status == DEVICE_STATUS_NEEDS_CLEANING:
+        return service_error(
+            "DEVICE_NEEDS_CLEANING",
+            f"device {device_id} must be marked cleaned before assignment",
+            field="assigned_device_id",
+        )
+    if status == DEVICE_STATUS_SENSOR_FAULT:
+        return service_error(
+            "DEVICE_SENSOR_FAULT",
+            f"device {device_id} is in SENSOR_FAULT",
+            field="assigned_device_id",
+        )
+
+    if same_assignment:
+        return None
+
+    if assignment_source == "packet":
+        if status not in {DEVICE_STATUS_AVAILABLE, DEVICE_STATUS_OFFLINE}:
+            return service_error(
+                "DEVICE_UNAVAILABLE",
+                f"device {device_id} is unavailable with status {status}",
+                field="assigned_device_id",
+            )
+        return None
+
+    if status != DEVICE_STATUS_AVAILABLE:
+        return service_error(
+            "DEVICE_UNAVAILABLE",
+            f"device {device_id} is unavailable with status {status}",
+            field="assigned_device_id",
+        )
+    if not device_is_online(device):
+        return service_error(
+            "DEVICE_OFFLINE",
+            f"device {device_id} is offline or has not started",
+            field="assigned_device_id",
+        )
 
     return None
 
 
-def assign_device_to_encounter(device_id, patient_id, encounter_id):
-    conflict = device_assignment_conflict(device_id, patient_id, encounter_id)
-    if conflict:
-        return {"ok": False, "error": conflict}
+def device_assignment_conflict(device_id, patient_id, encounter_id=None):
+    error = device_assignment_error(device_id, patient_id, encounter_id)
+    return error["error"] if error else None
+
+
+def assign_device_to_encounter(
+    device_id: str,
+    patient_id: str,
+    encounter_id: str,
+    *,
+    assignment_source: str = "manual",
+) -> dict[str, Any]:
+    assignment_error = device_assignment_error(
+        device_id,
+        patient_id,
+        encounter_id,
+        assignment_source=assignment_source,
+    )
+    if assignment_error:
+        return assignment_error
 
     encounter = state.encounters.get(encounter_id)
     if encounter is None or not encounter.get("active"):
-        return {"ok": False, "error": "encounter is not active"}
+        return service_error("INACTIVE_ENCOUNTER", "encounter is not active")
     if encounter.get("patient_id") != patient_id:
-        return {"ok": False, "error": "encounter does not belong to patient"}
+        return service_error(
+            "ENCOUNTER_PATIENT_MISMATCH",
+            "encounter does not belong to patient",
+        )
 
     device = state.devices.get(device_id)
     if device is None:
-        registration = register_device({"device_id": device_id})
-        device = registration["device"]
-        state.devices[device_id] = device
+        return service_error(
+            "UNKNOWN_DEVICE",
+            f"device {device_id} is not registered",
+            field="assigned_device_id",
+        )
 
     now = database.utc_now_string()
+    was_same_assignment = (
+        device.get("assigned_patient_id") == patient_id
+        and device.get("assigned_encounter_id") == encounter_id
+    )
     device["assigned_patient_id"] = patient_id
     device["assigned_encounter_id"] = encounter_id
     device["status"] = DEVICE_STATUS_ASSIGNED
@@ -205,28 +376,44 @@ def assign_device_to_encounter(device_id, patient_id, encounter_id):
     if profile is not None:
         database.save_patient_profile(patient_id)
 
-    return {"ok": True, "device": device.copy()}
+    return {
+        "ok": True,
+        "assigned": not was_same_assignment,
+        "device": device.copy(),
+    }
 
 
+@synchronized
 def assign_device(assignment):
     device_id = str(assignment.get("device_id") or "").strip()
     patient_id = str(assignment.get("patient_id") or "").strip()
     encounter_id = assignment.get("encounter_id")
 
     if not device_id:
-        return {"ok": False, "error": "missing device_id"}
+        return service_error("MISSING_DEVICE_ID", "missing device_id", field="device_id")
     if not patient_id:
-        return {"ok": False, "error": "missing patient_id"}
+        return service_error("MISSING_PATIENT_ID", "missing patient_id", field="patient_id")
 
     active_encounter_id = get_active_encounter_id(patient_id)
     if active_encounter_id is None:
-        return {"ok": False, "error": "patient has no active encounter"}
+        return service_error("INACTIVE_ENCOUNTER", "patient has no active encounter")
     if encounter_id is None:
         encounter_id = active_encounter_id
     if encounter_id != active_encounter_id:
-        return {"ok": False, "error": "patient has no matching active encounter"}
+        return service_error(
+            "INACTIVE_ENCOUNTER",
+            "patient has no matching active encounter",
+        )
 
-    return assign_device_to_encounter(device_id, patient_id, encounter_id)
+    result = assign_device_to_encounter(device_id, patient_id, encounter_id)
+    if result.get("ok") and result.get("assigned"):
+        add_patient_event(
+            patient_id,
+            "Device assigned",
+            f"Device {device_id} assigned",
+            encounter_id,
+        )
+    return result
 
 
 def update_device_from_packet(packet, received_at):
@@ -252,6 +439,7 @@ def update_device_from_packet(packet, received_at):
         device_id,
         patient_id,
         encounter_id,
+        assignment_source="packet",
     )
     if not assignment["ok"]:
         raise RuntimeError(assignment["error"])
@@ -268,9 +456,36 @@ def update_device_from_packet(packet, received_at):
 
     device["last_seen"] = received_at
     device["status"] = DEVICE_STATUS_ACTIVE
+    device["last_packet_sequence"] = packet.get("packet_sequence")
+    device["last_device_send_time"] = packet.get("device_send_time")
     device["updated_at"] = database.utc_now_string()
     database.save_device(device)
-    return auto_registered
+    return auto_registered, assignment.get("assigned", False)
+
+
+def note_known_device_packet_presence(
+    packet: dict[str, Any],
+    received_at: str,
+) -> None:
+    """Record technical presence for a valid-but-rejected known-device packet."""
+    device_id = parsed_identifier(packet, "device_id")
+    if device_id is None:
+        return
+    device = state.devices.get(device_id)
+    if device is None or not device.get("is_active", True):
+        return
+
+    if packet.get("device_type"):
+        device["device_type"] = packet["device_type"]
+    if packet.get("battery_percent") is not None:
+        device["battery_percent"] = packet["battery_percent"]
+    if packet.get("wifi_rssi") is not None:
+        device["wifi_rssi"] = packet["wifi_rssi"]
+    if packet.get("firmware_version"):
+        device["firmware_version"] = packet["firmware_version"]
+    device["last_seen"] = received_at
+    device["updated_at"] = database.utc_now_string()
+    database.save_device(device)
 
 
 def release_device_from_encounter(encounter_id):
@@ -301,6 +516,8 @@ def refresh_device_offline_statuses():
     now = datetime.now(timezone.utc)
 
     for device in state.devices.values():
+        if not device.get("is_active", True):
+            continue
         if not device.get("assigned_encounter_id") or not device.get("last_seen"):
             continue
 
@@ -318,12 +535,185 @@ def refresh_device_offline_statuses():
                 database.save_device(device)
 
 
-def get_devices():
+def device_public_view(
+    device: dict[str, Any],
+    *,
+    has_historical_dependencies: Optional[bool] = None,
+) -> dict[str, Any]:
+    view = device.copy()
+    age = device_last_seen_age_seconds(device)
+    is_active = bool(device.get("is_active", True))
+    view["lifecycle_state"] = "ACTIVE" if is_active else "RETIRED"
+    view["online"] = is_active and age is not None and age <= OFFLINE_AFTER_SECONDS
+    view["last_seen_age_seconds"] = age
+    eligibility = device_assignment_error(
+        device["device_id"],
+        "",
+        assignment_source="manual",
+    )
+    view["assignable"] = eligibility is None
+    view["unavailable_reason"] = eligibility["error"] if eligibility else None
+    view["sensor_health"] = (
+        DEVICE_STATUS_SENSOR_FAULT
+        if device.get("status") == DEVICE_STATUS_SENSOR_FAULT
+        else None
+    )
+    if not is_active:
+        view["removal_action"] = "RETIRED"
+    elif device.get("assigned_encounter_id"):
+        view["removal_action"] = "BLOCKED"
+    else:
+        if has_historical_dependencies is None:
+            dependencies = database.device_dependency_counts(device["device_id"])
+            has_historical_dependencies = any(dependencies.values())
+        view["removal_action"] = (
+            "RETIRE" if has_historical_dependencies else "DELETE"
+        )
+    return view
+
+
+def get_devices(*, include_retired: bool = False):
     refresh_device_offline_statuses()
+    historical_device_ids = database.device_ids_with_historical_dependencies()
     return [
-        state.devices[device_id].copy()
+        device_public_view(
+            state.devices[device_id],
+            has_historical_dependencies=device_id in historical_device_ids,
+        )
         for device_id in sorted(state.devices)
+        if include_retired or state.devices[device_id].get("is_active", True)
     ]
+
+
+@synchronized
+def remove_device(device_id: str, reason: Optional[str] = None) -> dict[str, Any]:
+    device_id = str(device_id or "").strip()
+    device = state.devices.get(device_id)
+    if device is None:
+        return service_error(
+            "UNKNOWN_DEVICE",
+            f"device {device_id} is not registered",
+            field="device_id",
+        )
+
+    active_encounter = next(
+        (
+            encounter
+            for encounter in state.encounters.values()
+            if encounter.get("active")
+            and encounter.get("assigned_device_id") == device_id
+        ),
+        None,
+    )
+    if active_encounter is not None or device.get("assigned_encounter_id"):
+        return service_error(
+            "DEVICE_ASSIGNED",
+            f"device {device_id} is assigned to an active encounter and must "
+            "be released before removal",
+            field="device_id",
+        )
+
+    dependencies = database.device_dependency_counts(device_id)
+    if not any(dependencies.values()):
+        if not database.delete_device(device_id):
+            return service_error(
+                "UNKNOWN_DEVICE",
+                f"device {device_id} is not registered",
+                field="device_id",
+            )
+        del state.devices[device_id]
+        return {
+            "ok": True,
+            "outcome": "deleted",
+            "device_id": device_id,
+            "message": "Device deleted.",
+        }
+
+    retired_at = database.utc_now_string()
+    device["is_active"] = False
+    device["retired_at"] = retired_at
+    device["retired_reason"] = str(reason or "").strip()[:500] or None
+    device["assigned_patient_id"] = None
+    device["assigned_encounter_id"] = None
+    device["updated_at"] = retired_at
+    database.save_device(device)
+    return {
+        "ok": True,
+        "outcome": "retired",
+        "device_id": device_id,
+        "message": "Device retired and removed from active use.",
+        "device": device_public_view(device),
+    }
+
+
+@synchronized
+def restore_device(device_id: str) -> dict[str, Any]:
+    device_id = str(device_id or "").strip()
+    device = state.devices.get(device_id)
+    if device is None:
+        return service_error(
+            "UNKNOWN_DEVICE",
+            f"device {device_id} is not registered",
+            field="device_id",
+        )
+    if device.get("is_active", True):
+        return {
+            "ok": True,
+            "restored": False,
+            "device": device_public_view(device),
+        }
+
+    device["is_active"] = True
+    device["retired_at"] = None
+    device["retired_reason"] = None
+    device["assigned_patient_id"] = None
+    device["assigned_encounter_id"] = None
+    device["updated_at"] = database.utc_now_string()
+    database.save_device(device)
+    return {
+        "ok": True,
+        "restored": True,
+        "message": "Device restored to active registry use.",
+        "device": device_public_view(device),
+    }
+
+
+@synchronized
+def mark_device_clean(request: dict[str, Any]) -> dict[str, Any]:
+    device_id = str(request.get("device_id") or "").strip()
+    if not device_id:
+        return service_error("MISSING_DEVICE_ID", "missing device_id", field="device_id")
+
+    device = state.devices.get(device_id)
+    if device is None:
+        return service_error(
+            "UNKNOWN_DEVICE",
+            f"device {device_id} is not registered",
+            field="device_id",
+        )
+    if not device.get("is_active", True):
+        return service_error(
+            "DEVICE_RETIRED",
+            f"device {device_id} is retired",
+            field="device_id",
+        )
+    if device.get("assigned_encounter_id"):
+        return service_error(
+            "DEVICE_ASSIGNED",
+            f"device {device_id} is still assigned and cannot be marked clean",
+            field="device_id",
+        )
+    if device.get("status") != DEVICE_STATUS_NEEDS_CLEANING:
+        return service_error(
+            "INVALID_DEVICE_TRANSITION",
+            f"device {device_id} is {device.get('status')}, not NEEDS_CLEANING",
+            field="device_id",
+        )
+
+    device["status"] = DEVICE_STATUS_AVAILABLE
+    device["updated_at"] = database.utc_now_string()
+    database.save_device(device)
+    return {"ok": True, "device": device_public_view(device)}
 
 
 def patient_encounters(patient_id):
@@ -458,6 +848,7 @@ def reject_vitals_packet(
     received_at=None,
     endpoint="/api/vitals",
     started_at=None,
+    code="PACKET_REJECTED",
 ):
     save_packet_audit(
         packet=packet,
@@ -472,8 +863,10 @@ def reject_vitals_packet(
     )
 
     return {
+        "ok": False,
         "received": True,
         "accepted": False,
+        "code": code,
         "error": error,
     }
 
@@ -580,7 +973,7 @@ def compute_patient_status(
             "seconds_since_seen": None,
         }
 
-    seconds_since_seen = int(time.time() - received_at)
+    seconds_since_seen = max(0, int(time.time() - received_at))
 
     if seconds_since_seen > OFFLINE_AFTER_SECONDS:
         return {
@@ -616,6 +1009,60 @@ def compute_patient_status(
     }
 
 
+def packet_assignment_error(
+    device_id: str,
+    patient_id: str,
+    encounter_id: Optional[str],
+) -> Optional[dict[str, Any]]:
+    if encounter_id is not None:
+        encounter = state.encounters.get(encounter_id)
+        assigned_device_id = (
+            encounter.get("assigned_device_id", "") if encounter else ""
+        )
+        if assigned_device_id and assigned_device_id != device_id:
+            return service_error(
+                "ENCOUNTER_DEVICE_ASSIGNED",
+                f"patient {patient_id} encounter {encounter_id} is already "
+                f"assigned to device {assigned_device_id}",
+                field="device_id",
+            )
+
+    if device_id not in state.devices:
+        return None
+
+    return device_assignment_error(
+        device_id,
+        patient_id,
+        encounter_id,
+        assignment_source="packet",
+    )
+
+
+def duplicate_packet_error(
+    packet: dict[str, Any],
+) -> Optional[dict[str, Any]]:
+    device = state.devices.get(packet["device_id"])
+    if device is None:
+        return None
+
+    packet_sequence = packet.get("packet_sequence")
+    device_send_time = packet.get("device_send_time")
+    if packet_sequence is None or not device_send_time:
+        return None
+
+    if (
+        device.get("last_packet_sequence") == packet_sequence
+        and device.get("last_device_send_time") == device_send_time
+    ):
+        return service_error(
+            "DUPLICATE_PACKET",
+            f"duplicate packet identity for device {packet['device_id']}: "
+            f"sequence {packet_sequence} at {device_send_time}",
+        )
+    return None
+
+
+@synchronized
 def receive_vitals(
     packet,
     *,
@@ -650,19 +1097,63 @@ def receive_vitals(
     patient_id = packet["patient_id"]
     device_id = packet["device_id"]
     active_encounter_id = get_active_encounter_id(patient_id)
-    assignment_error = device_assignment_conflict(
-        device_id,
-        patient_id,
-        active_encounter_id,
+
+    known_device = state.devices.get(device_id)
+    if known_device is not None and not known_device.get("is_active", True):
+        return reject_vitals_packet(
+            raw_packet_json=raw_packet_json,
+            error=f"Device {device_id} is retired.",
+            code="DEVICE_RETIRED",
+            packet=packet,
+            received_at=received_at,
+            endpoint=endpoint,
+            started_at=started_at,
+        )
+
+    if (
+        patient_id in state.patient_profiles
+        and active_encounter_id is None
+        and patient_encounters(patient_id)
+    ):
+        note_known_device_packet_presence(packet, received_at)
+        return reject_vitals_packet(
+            raw_packet_json=raw_packet_json,
+            error=(
+                f"patient {patient_id} has been dismissed; explicit readmission "
+                "is required before packets can be accepted"
+            ),
+            code="INACTIVE_ENCOUNTER",
+            packet=packet,
+            received_at=received_at,
+            endpoint=endpoint,
+            started_at=started_at,
+        )
+
+    duplicate_error = duplicate_packet_error(packet)
+    if duplicate_error:
+        return reject_vitals_packet(
+            raw_packet_json=raw_packet_json,
+            error=duplicate_error["error"],
+            code=duplicate_error["code"],
+            packet=packet,
+            received_at=received_at,
+            endpoint=endpoint,
+            started_at=started_at,
+        )
+
+    assignment_error = packet_assignment_error(
+        device_id, patient_id, active_encounter_id
     )
 
     if assignment_error:
+        note_known_device_packet_presence(packet, received_at)
         return reject_vitals_packet(
             raw_packet_json=raw_packet_json,
             error=combine_messages(
-                f"device assignment error: {assignment_error}",
+                f"device assignment error: {assignment_error['error']}",
                 validation.validation_error,
             ),
+            code=assignment_error["code"],
             packet=packet,
             received_at=received_at,
             endpoint=endpoint,
@@ -698,7 +1189,15 @@ def receive_vitals(
 
     packet["encounter_id"] = encounter_id
 
-    auto_registered = update_device_from_packet(packet, received_at)
+    auto_registered, newly_assigned = update_device_from_packet(packet, received_at)
+
+    if newly_assigned:
+        add_patient_event(
+            patient_id,
+            "Device assigned",
+            f"Device {device_id} assigned from packet",
+            encounter_id,
+        )
 
     state.patients[patient_id] = packet
     database.save_latest_patient_state(patient_id, packet)
@@ -728,7 +1227,6 @@ def receive_vitals(
                 or previous_history.get("status") == STATUS_GRAY
             )
         ):
-            print("Updated current state only, not history")
             history_logged = False
 
     if history_logged:
@@ -738,7 +1236,6 @@ def receive_vitals(
             state.latest_packets.pop(0)
 
         database.append_history_packet(packet)
-        print(packet)
 
     status_after_processing = compute_patient_status(
         patient_id,
@@ -764,6 +1261,7 @@ def receive_vitals(
     )
 
     return {
+        "ok": True,
         "received": True,
         "accepted": True,
         "logged": history_logged,
@@ -786,8 +1284,9 @@ def get_latest():
         offline_packet["seconds_since_seen"] = int(seconds_since_seen)
         return offline_packet
 
-    packet["seconds_since_seen"] = int(seconds_since_seen)
-    return packet
+    latest_packet = packet.copy()
+    latest_packet["seconds_since_seen"] = max(0, int(seconds_since_seen))
+    return latest_packet
 
 
 def get_history():
@@ -800,7 +1299,16 @@ def get_history():
 
 
 def get_packet_logs(limit=50):
-    return database.get_recent_packet_logs(limit)
+    logs = database.get_recent_packet_logs(limit)
+    for log in logs:
+        device = state.devices.get(log.get("parsed_device_id"))
+        if device is None:
+            log["device_lifecycle_state"] = "UNKNOWN"
+        else:
+            log["device_lifecycle_state"] = (
+                "ACTIVE" if device.get("is_active", True) else "RETIRED"
+            )
+    return logs
 
 
 def get_patients():
@@ -824,6 +1332,14 @@ def get_patients():
         )
         patient.update(computed_status)
         patient["encounter_id"] = encounter_id
+        patient["rr_fresh"] = (
+            patient.get("resp_rate_bpm") is not None
+            and str(patient.get("rr_quality") or "").upper()
+            in RELIABLE_RR_QUALITIES
+            and computed_status["status"] != STATUS_OFFLINE
+            and computed_status["seconds_since_seen"] is not None
+            and computed_status["seconds_since_seen"] <= OFFLINE_AFTER_SECONDS
+        )
 
         patient["priority"] = patient_id in state.priority_patients
 
@@ -860,30 +1376,22 @@ def get_patients():
     return output
 
 
+@synchronized
 def add_action(action):
     patient_id = action.get("patient_id")
     action_type = action.get("action_type")
     note = action.get("note", "")
 
     if not patient_id:
-        return {
-            "ok": False,
-            "error": "missing patient_id",
-        }
+        return service_error("MISSING_PATIENT_ID", "missing patient_id", field="patient_id")
 
     if not action_type:
-        return {
-            "ok": False,
-            "error": "missing action_type",
-        }
+        return service_error("MISSING_ACTION_TYPE", "missing action_type", field="action_type")
 
     encounter_id = get_active_encounter_id(patient_id)
 
     if encounter_id is None:
-        return {
-            "ok": False,
-            "error": "patient has no active encounter",
-        }
+        return service_error("INACTIVE_ENCOUNTER", "patient has no active encounter")
 
     encounter = state.encounters[encounter_id]
 
@@ -893,11 +1401,12 @@ def add_action(action):
 
     if action_type == ACTION_DEESCALATION:
         if patient_id not in state.priority_patients:
-            return {
-                "ok": False,
-                "ignored": True,
-                "error": "patient is not in Priority Patients",
-            }
+            result = service_error(
+                "NOT_PRIORITY",
+                "patient is not in Priority Patients",
+            )
+            result["ignored"] = True
+            return result
 
         state.priority_patients.discard(patient_id)
         encounter["is_priority"] = False
@@ -946,7 +1455,19 @@ def get_patient_events(patient_id):
 
 
 def get_encounters(patient_id):
-    return database.get_encounters(patient_id)
+    encounters = database.get_encounters(patient_id)
+    for encounter in encounters:
+        device_id = encounter.get("assigned_device_id")
+        device = state.devices.get(device_id)
+        if not device_id:
+            encounter["assigned_device_lifecycle_state"] = None
+        elif device is None:
+            encounter["assigned_device_lifecycle_state"] = "UNKNOWN"
+        else:
+            encounter["assigned_device_lifecycle_state"] = (
+                "ACTIVE" if device.get("is_active", True) else "RETIRED"
+            )
+    return encounters
 
 
 def get_handoff(patient_id, encounter_id=None):
@@ -1005,6 +1526,19 @@ def get_handoff(patient_id, encounter_id=None):
     )
     assigned_device = state.devices.get(assigned_device_id, {})
     assigned_device_type = assigned_device.get("device_type") or "UNKNOWN"
+    if not assigned_device_id:
+        assigned_device_lifecycle_state = None
+    elif not assigned_device:
+        assigned_device_lifecycle_state = "UNKNOWN"
+    elif not assigned_device.get("is_active", True):
+        assigned_device_lifecycle_state = "RETIRED"
+    else:
+        assigned_device_lifecycle_state = "ACTIVE"
+    assigned_device_display = (
+        f"{assigned_device_id} ({assigned_device_lifecycle_state})"
+        if assigned_device_id
+        else "--"
+    )
 
     admission_time = encounter["admission_time"]
     dismissal_time = encounter["dismissal_time"] or "Pending"
@@ -1026,7 +1560,15 @@ def get_handoff(patient_id, encounter_id=None):
     hr = latest.get("heart_rate_bpm")
     spo2 = latest.get("spo2_percent")
     temp = latest.get("object_temp_c")
-    rr_handoff_line = format_research_rr_handoff(latest)
+    rr_fresh = (
+        computed_status["status"] != STATUS_OFFLINE
+        and computed_status["seconds_since_seen"] is not None
+        and computed_status["seconds_since_seen"] <= OFFLINE_AFTER_SECONDS
+    )
+    rr_handoff_line = format_research_rr_handoff(
+        latest,
+        rr_fresh=rr_fresh,
+    )
 
     trend_lines = []
 
@@ -1081,21 +1623,10 @@ def get_handoff(patient_id, encounter_id=None):
     else:
         event_lines.append("No workflow events recorded yet.")
 
-    if status in ["RED", STATUS_CRASHING]:
-        recommendation = "Immediate reassessment / provider review recommended."
-    elif status == STATUS_ORANGE:
-        recommendation = "Priority reassessment recommended due to worsening trend."
-    elif status == "YELLOW":
-        recommendation = "Routine reassessment recommended."
-    elif status == STATUS_GRAY:
-        recommendation = "Sensor contact should be checked."
-    elif status == STATUS_OFFLINE:
-        recommendation = "Device connection should be checked."
-    else:
-        recommendation = "Patient currently appears stable."
-
     summary = f"""
 Patient {patient_id} Handoff Summary
+
+Investigational engineering prototype. Not intended for patient-care decisions.
 
 Encounter ID:
 {encounter_id}
@@ -1106,7 +1637,7 @@ Age: {age if age else "--"}
 Chief complaint: {chief_complaint if chief_complaint else "--"}
 Triage level: {triage_level if triage_level else "--"}
 Location: {location if location else "--"}
-Assigned device: {assigned_device_id if assigned_device_id else "--"}
+Assigned device: {assigned_device_display}
 Device type: {assigned_device_type if assigned_device_id else "--"}
 
 Admission time:
@@ -1136,8 +1667,8 @@ Recent trend:
 Recent timeline:
 {chr(10).join(event_lines)}
 
-Suggested attention:
-{recommendation}
+Prototype workflow state:
+{status}. This prototype provides no diagnosis, treatment, or clinical recommendation.
 """.strip()
 
     return {
@@ -1148,18 +1679,17 @@ Suggested attention:
         "assigned_device_type": (
             assigned_device_type if assigned_device_id else None
         ),
+        "assigned_device_lifecycle_state": assigned_device_lifecycle_state,
         "summary": summary,
     }
 
 
+@synchronized
 def register_patient(profile):
     patient_id = str(profile.get("patient_id") or "").strip()
 
     if not patient_id:
-        return {
-            "ok": False,
-            "error": "missing patient_id",
-        }
+        return service_error("MISSING_PATIENT_ID", "missing patient_id", field="patient_id")
 
     active_encounter_id = get_active_encounter_id(patient_id)
     had_previous_encounter = bool(patient_encounters(patient_id))
@@ -1178,16 +1708,16 @@ def register_patient(profile):
     assigned_device_id = requested_device_id or existing_device_id
 
     if assigned_device_id:
-        assignment_error = device_assignment_conflict(
+        assignment_error = device_assignment_error(
             assigned_device_id,
             patient_id,
             active_encounter_id,
         )
         if assignment_error:
-            return {
-                "ok": False,
-                "error": f"device assignment error: {assignment_error}",
-            }
+            assignment_error["error"] = (
+                f"device assignment error: {assignment_error['error']}"
+            )
+            return assignment_error
 
     if active_encounter_id is None:
         admission_time = datetime_string()
@@ -1227,6 +1757,7 @@ def register_patient(profile):
 
     database.save_patient_profile(patient_id)
 
+    device_newly_assigned = False
     if assigned_device_id:
         assignment = assign_device_to_encounter(
             assigned_device_id,
@@ -1235,6 +1766,7 @@ def register_patient(profile):
         )
         if not assignment["ok"]:
             return assignment
+        device_newly_assigned = assignment.get("assigned", False)
 
     if should_save_placeholder:
         database.save_latest_patient_state(
@@ -1254,6 +1786,14 @@ def register_patient(profile):
         ),
         encounter_id=encounter_id,
     )
+
+    if device_newly_assigned:
+        add_patient_event(
+            patient_id=patient_id,
+            event_type="Device assigned",
+            note=f"Device {assigned_device_id} assigned",
+            encounter_id=encounter_id,
+        )
 
     return {
         "ok": True,

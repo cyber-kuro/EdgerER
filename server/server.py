@@ -16,6 +16,36 @@ import services
 BASE_DIR = Path(__file__).resolve().parent
 
 
+CONFLICT_CODES = {
+    "DEVICE_ASSIGNED",
+    "DEVICE_NEEDS_CLEANING",
+    "DEVICE_SENSOR_FAULT",
+    "DEVICE_OFFLINE",
+    "DEVICE_RETIRED",
+    "DEVICE_UNAVAILABLE",
+    "DUPLICATE_PACKET",
+    "ENCOUNTER_DEVICE_ASSIGNED",
+    "INACTIVE_ENCOUNTER",
+}
+
+
+def api_result(
+    result: dict,
+    *,
+    success_status: int = 200,
+    not_found_codes: set[str] | None = None,
+):
+    if result.get("ok") is False or result.get("accepted") is False:
+        if result.get("code") in (not_found_codes or set()):
+            status_code = 404
+        else:
+            status_code = 409 if result.get("code") in CONFLICT_CODES else 400
+        return JSONResponse(content=result, status_code=status_code)
+    if success_status != 200:
+        return JSONResponse(content=result, status_code=success_status)
+    return result
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     database.initialize_database()
@@ -47,6 +77,7 @@ async def receive_vitals(request: Request):
             error=f"malformed JSON: {error.msg}",
             received_at=received_at,
             started_at=started_at,
+            code="MALFORMED_JSON",
         )
         return JSONResponse(content=result, status_code=400)
 
@@ -57,10 +88,7 @@ async def receive_vitals(request: Request):
         started_at=started_at,
     )
 
-    if result.get("accepted") is False:
-        return JSONResponse(content=result, status_code=400)
-
-    return result
+    return api_result(result)
 
 
 @app.get("/api/latest")
@@ -79,18 +107,39 @@ def get_packet_logs(limit: int = 50):
 
 
 @app.get("/api/devices")
-def get_devices():
-    return services.get_devices()
+def get_devices(include_retired: bool = False):
+    return services.get_devices(include_retired=include_retired)
 
 
 @app.post("/api/register_device")
 def register_device(device_profile: dict):
-    return services.register_device(device_profile)
+    return api_result(services.register_device(device_profile))
 
 
 @app.post("/api/assign_device")
 def assign_device(assignment: dict):
-    return services.assign_device(assignment)
+    return api_result(services.assign_device(assignment))
+
+
+@app.post("/api/devices/mark_clean")
+def mark_device_clean(request: dict):
+    return api_result(services.mark_device_clean(request))
+
+
+@app.delete("/api/devices/{device_id}")
+def remove_device(device_id: str, reason: str | None = None):
+    return api_result(
+        services.remove_device(device_id, reason),
+        not_found_codes={"UNKNOWN_DEVICE"},
+    )
+
+
+@app.post("/api/devices/{device_id}/restore")
+def restore_device(device_id: str):
+    return api_result(
+        services.restore_device(device_id),
+        not_found_codes={"UNKNOWN_DEVICE"},
+    )
 
 
 @app.get("/api/patients")
@@ -100,7 +149,7 @@ def get_patients():
 
 @app.post("/api/action")
 def add_action(action: dict):
-    return services.add_action(action)
+    return api_result(services.add_action(action))
 
 
 @app.get("/api/events/{patient_id}")
@@ -120,7 +169,7 @@ def get_handoff(patient_id: str, encounter_id: str | None = None):
 
 @app.post("/api/register_patient")
 def register_patient(profile: dict):
-    return services.register_patient(profile)
+    return api_result(services.register_patient(profile))
 
 
 @app.get("/", response_class=HTMLResponse)

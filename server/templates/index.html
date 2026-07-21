@@ -1,222 +1,383 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-
-    <title>EdgeER Dashboard</title>
-
-    <div id="noteBox" style="
-        display:none;
-        background:white;
-        border:2px solid #444;
-        padding:20px;
-        margin:15px 0;
-        border-radius:10px;
-        box-shadow:0 2px 8px #aaa;
-    ">
-        <h3 id="noteBoxTitle">Post Note</h3>
-
-        <p>
-            <b>Patient:</b>
-            <span id="noteBoxPatient">None</span>
-        </p>
-
-        <textarea id="noteText" rows="4" style="width:100%; font-size:16px;"
-            placeholder="Write note here..."></textarea>
-
-        <br><br>
-
-        <button onclick="postNote()">Post</button>
-    </div>
-
-    <div id="handoffChoiceBox" style="
-        display:none;
-        background:white;
-        border:2px solid #444;
-        padding:20px;
-        margin:15px 0;
-        border-radius:10px;
-        box-shadow:0 2px 8px #aaa;
-    ">
-        <h3>Patient dismissed</h3>
-
-        <p>Generate handoff summary?</p>
-
-        <button onclick="confirmHandoffYes()">Yes</button>
-        <button onclick="confirmHandoffNo()">No</button>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=20260701-rr-columns-1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EdgeER Engineering Console</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=20260720-rc1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="{{ url_for('static', path='/dashboard.js') }}?v=20260720-rc1" defer></script>
 </head>
 <body>
-<button onclick="enableSound()">Enable Alert Sound</button>
-<h1>EdgeER Dashboard</h1>
-
-<div class="card">
-    <h2>Register Patient</h2>
-
-    <input id="regPatientId" placeholder="Patient ID, e.g. P001">
-    <input id="regName" placeholder="Name or anonymous code">
-    <input id="regAge" placeholder="Age">
-
-    <input id="regComplaint" placeholder="Chief complaint">
-
-    <select id="regTriage">
-        <option value="">Triage level</option>
-        <option value="Unknown">Unknown</option>
-        <option value="Red">Red</option>
-        <option value="Orange">Orange</option>
-        <option value="Yellow">Yellow</option>
-        <option value="Green">Green</option>
-    </select>
-
-    <input id="regLocation" placeholder="Location, e.g. Waiting Room B">
-    <input id="regDevice" placeholder="Assigned device ID, e.g. PI-001">
-
-    <button onclick="registerPatient()">Register Patient</button>
-</div>
-
-<div class="card">
-    <h2>Device Status</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Device ID</th>
-                <th>Device Type</th>
-                <th>Assigned Patient</th>
-                <th>Status</th>
-                <th>Battery</th>
-                <th>Wi-Fi RSSI</th>
-                <th>Last Seen</th>
-                <th>Firmware</th>
-            </tr>
-        </thead>
-
-        <tbody id="devicesTable"></tbody>
-    </table>
-</div>
-
-<div class="card">
-
-    <h2>Patient Details</h2>
-
-        <p><b>Selected Patient:</b>
-            <span id="selectedPatient">None</span>
-        </p>
-
-        <h3>Research RR (PPG-derived)</h3>
-        <div id="researchRrDetail" class="rr-detail rr-unavailable">
-            Select a patient to view PPG-derived RR metadata.
+    <header class="app-header">
+        <div class="brand-block">
+            <div class="brand-mark" aria-hidden="true">ER</div>
+            <div>
+                <p class="eyebrow">Multipatient reassessment workflow</p>
+                <h1>EdgeER Engineering Console</h1>
+                <p class="subtitle">Live prototype state, device readiness, and workflow review</p>
+            </div>
         </div>
-
-        <div id="actionButtons" style="margin: 15px 0;">
-            <button onclick="openNoteBox('Seen by nurse')">Seen by nurse</button>
-            <button onclick="openNoteBox('Doctor notified')">Doctor notified</button>
-            <button onclick="openNoteBox('Escalation')">Escalate</button>
-            <button onclick="openNoteBox('Recheck in 15 min')">Recheck in 15 min</button>
-            <button onclick="openNoteBox('Medication given')">Medication given</button>
-            <button onclick="generateHandoff()">Generate Handoff</button>
-            <button onclick="openNoteBox('Dismissed to monitoring room')">Dismiss to Monitoring Room</button>
+        <div class="header-actions">
+            <span id="serverState" class="connection-badge state-loading" role="status">
+                <span class="connection-dot" aria-hidden="true"></span>
+                <span id="serverStateText">Connecting</span>
+            </span>
+            <button id="soundButton" class="button button-secondary" type="button" onclick="enableSound()">
+                Enable alert sound
+            </button>
+            <button class="button button-primary" type="button" onclick="openRegistrationDialog()">
+                Register patient
+            </button>
         </div>
+    </header>
 
-        <h3>Handoff Summary</h3>
-
-        <pre id="handoffSummary" style="
-            background:#f0f0f0;
-            padding:15px;
-            border-radius:8px;
-            white-space:pre-wrap;
-        ">Select a patient and click Generate Handoff.</pre>
-
-        <canvas id="patientChart"></canvas>
-
-        <br>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>HR</th>
-                    <th>SpO₂</th>
-                    <th>Temp</th>
-                    <th>PPG-derived RR</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-
-            <tbody id="detailHistory"></tbody>
-
-        </table>
-
-        <h3>Patient Timeline</h3>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Event</th>
-                    <th>Note</th>
-                </tr>
-            </thead>
-
-            <tbody id="eventTimeline"></tbody>
-        </table>
-
+    <div class="prototype-notice" role="note">
+        <span class="notice-icon" aria-hidden="true">i</span>
+        <span>Investigational engineering prototype. Not intended for patient-care decisions.</span>
     </div>
 
-    <h2>Priority Patients</h2>
+    <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Complaint</th>
-                <th>Triage</th>
-                <th>Location</th>
-                <th>HR</th>
-                <th>SpO₂</th>
-                <th>Temp</th>
-                <th>RR</th>
-                <th>Status</th>
-                <th>Reasons</th>
-                <th>Last Seen</th>
-                <th>Workflow</th>
-                <th>Alert</th>
-            </tr>
-        </thead>
+    <main class="dashboard-shell">
+        <section class="summary-grid" aria-label="Dashboard overview">
+            <article class="metric-card">
+                <span class="metric-label">Active patients</span>
+                <strong id="activePatientCount" class="metric-value">—</strong>
+                <span class="metric-caption">Current encounters</span>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Priority</span>
+                <strong id="priorityPatientCount" class="metric-value">—</strong>
+                <span class="metric-caption">Workflow priority</span>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Devices online</span>
+                <strong id="onlineDeviceCount" class="metric-value">—</strong>
+                <span class="metric-caption">Seen within 15 seconds</span>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Available devices</span>
+                <strong id="availableDeviceCount" class="metric-value">—</strong>
+                <span class="metric-caption">Online and assignable</span>
+            </article>
+        </section>
 
-        <tbody id="priorityPatientsTable"></tbody>
-    </table>
+        <section class="card" aria-labelledby="priorityHeading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Reassessment queue</p>
+                    <h2 id="priorityHeading">Priority patients</h2>
+                </div>
+                <span id="prioritySectionState" class="section-status">Loading…</span>
+            </div>
+            <div class="table-scroll">
+                <table class="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Complaint</th>
+                            <th>Triage</th>
+                            <th>Location</th>
+                            <th class="numeric">HR</th>
+                            <th class="numeric">SpO₂</th>
+                            <th class="numeric">Temp</th>
+                            <th>RR</th>
+                            <th>Status</th>
+                            <th>Reasons</th>
+                            <th>Last Seen</th>
+                            <th>Workflow</th>
+                            <th>Alert</th>
+                        </tr>
+                    </thead>
+                    <tbody id="priorityPatientsTable">
+                        <tr><td colspan="13" class="table-state">Loading priority patients…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <br>
+        <section class="card" aria-labelledby="patientsHeading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Current encounters</p>
+                    <h2 id="patientsHeading">Other active patients</h2>
+                </div>
+                <span id="patientsSectionState" class="section-status">Loading…</span>
+            </div>
+            <div class="table-scroll">
+                <table class="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Complaint</th>
+                            <th>Triage</th>
+                            <th>Location</th>
+                            <th class="numeric">HR</th>
+                            <th class="numeric">SpO₂</th>
+                            <th class="numeric">Temp</th>
+                            <th>RR</th>
+                            <th>Status</th>
+                            <th>Reasons</th>
+                            <th>Last Seen</th>
+                            <th>Workflow</th>
+                            <th>Alert</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTable">
+                        <tr><td colspan="13" class="table-state">Loading active patients…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <h2>All Patients</h2>
+        <section id="devicePanel" class="card" aria-labelledby="devicesHeading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Registry</p>
+                    <h2 id="devicesHeading">Device status</h2>
+                </div>
+                <div class="section-actions">
+                    <label class="checkbox-control">
+                        <input id="showRetiredDevices" type="checkbox">
+                        Show retired devices
+                    </label>
+                    <button id="deviceRefreshButton" class="button button-quiet" type="button" onclick="loadDevices({ announce: true })">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table class="device-table">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Type</th>
+                            <th>Registry state</th>
+                            <th>Assignment</th>
+                            <th>Connectivity</th>
+                            <th>Last seen</th>
+                            <th class="numeric">Battery</th>
+                            <th>Sensor health</th>
+                            <th>Location</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="devicesTable">
+                        <tr><td colspan="10" class="table-state">Loading device registry…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Complaint</th>
-                <th>Triage</th>
-                <th>Location</th>
-                <th>HR</th>
-                <th>SpO₂</th>
-                <th>Temp</th>
-                <th>RR</th>
-                <th>Status</th>
-                <th>Reasons</th>
-                <th>Last Seen</th>
-                <th>Workflow</th>
-                <th>Alert</th>
-            </tr>
-        </thead>
+        <section class="card details-card" aria-labelledby="detailsHeading">
+            <div class="section-heading details-heading">
+                <div>
+                    <p class="eyebrow">Current encounter</p>
+                    <h2 id="detailsHeading">Patient details</h2>
+                </div>
+                <div class="selected-patient-label">
+                    Selected: <strong id="selectedPatient">None</strong>
+                </div>
+            </div>
 
-        <tbody id="patientsTable"></tbody>
-    </table>
-</div>
+            <div id="patientDetailsEmpty" class="empty-panel">
+                Select an active patient row to inspect measurements, workflow events, and handoff content.
+            </div>
 
-<script src="{{ url_for('static', path='/dashboard.js') }}?v=20260701-rr-columns-1"></script>
+            <div id="patientDetailsContent" class="details-content" hidden>
+                <div class="detail-grid">
+                    <div>
+                        <h3>Research RR (PPG-derived)</h3>
+                        <div id="researchRrDetail" class="rr-detail rr-unavailable">
+                            No RR data available.
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Workflow actions</h3>
+                        <div id="actionButtons" class="action-grid">
+                            <button class="button button-secondary" type="button" onclick="openNoteBox('Seen by nurse')">Seen by nurse</button>
+                            <button class="button button-secondary" type="button" onclick="openNoteBox('Doctor notified')">Doctor notified</button>
+                            <button class="button button-warning" type="button" onclick="openNoteBox('Escalation')">Escalate</button>
+                            <button class="button button-secondary" type="button" onclick="openNoteBox('Recheck in 15 min')">Recheck in 15 min</button>
+                            <button class="button button-secondary" type="button" onclick="openNoteBox('Medication given')">Medication given</button>
+                            <button class="button button-secondary" type="button" onclick="generateHandoff()">Generate handoff</button>
+                            <button class="button button-danger" type="button" onclick="openNoteBox('Dismissed to monitoring room')">Dismiss patient</button>
+                        </div>
+                    </div>
+                </div>
 
+                <h3>Recent measurements</h3>
+                <div id="chartState" class="inline-state">Waiting for measurement history.</div>
+                <div class="chart-wrap"><canvas id="patientChart" aria-label="Patient measurement history"></canvas></div>
+                <div class="table-scroll compact-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th class="numeric">HR</th>
+                                <th class="numeric">SpO₂</th>
+                                <th class="numeric">Temp</th>
+                                <th>PPG-derived RR</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailHistory">
+                            <tr><td colspan="6" class="table-state">No packet history for this encounter.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="detail-grid lower-details">
+                    <div>
+                        <h3>Patient timeline</h3>
+                        <div class="table-scroll compact-table">
+                            <table>
+                                <thead>
+                                    <tr><th>Time</th><th>Event</th><th>Note</th></tr>
+                                </thead>
+                                <tbody id="eventTimeline">
+                                    <tr><td colspan="3" class="table-state">No workflow events recorded.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="subsection-heading">
+                            <h3>Handoff summary</h3>
+                            <span class="technical-label">Prototype output</span>
+                        </div>
+                        <pre id="handoffSummary" class="handoff-summary">Select a patient and choose Generate handoff.</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <dialog id="registrationDialog" class="modal" aria-labelledby="registrationTitle">
+        <form id="registrationForm" method="dialog" novalidate>
+            <div class="modal-heading">
+                <div>
+                    <p class="eyebrow">New or returning encounter</p>
+                    <h2 id="registrationTitle">Register patient</h2>
+                </div>
+                <button class="icon-button" type="button" aria-label="Close registration" onclick="closeDialog('registrationDialog')">×</button>
+            </div>
+            <div id="registrationMessage" class="form-message" hidden></div>
+            <div class="form-grid">
+                <label>
+                    Patient ID <span aria-hidden="true">*</span>
+                    <input id="regPatientId" name="patient_id" autocomplete="off" required placeholder="P001">
+                    <span class="helper-text">Required unique patient or anonymous code.</span>
+                </label>
+                <label>
+                    Name or code
+                    <input id="regName" name="display_name" autocomplete="off" placeholder="Anonymous code">
+                </label>
+                <label>
+                    Age
+                    <input id="regAge" name="age" inputmode="numeric" autocomplete="off" placeholder="Years">
+                </label>
+                <label>
+                    Chief complaint
+                    <input id="regComplaint" name="chief_complaint" autocomplete="off" placeholder="Brief description">
+                </label>
+                <label>
+                    Triage level
+                    <select id="regTriage" name="triage_level">
+                        <option value="Unknown">Unknown</option>
+                        <option value="Red">Red</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Yellow">Yellow</option>
+                        <option value="Green">Green</option>
+                    </select>
+                </label>
+                <label>
+                    Location
+                    <input id="regLocation" name="location" autocomplete="off" placeholder="Waiting Room B">
+                </label>
+                <label class="form-span">
+                    Assigned device
+                    <div class="select-with-action">
+                        <select id="regDevice" name="assigned_device_id" aria-describedby="deviceSelectState" disabled>
+                            <option value="">Loading available devices…</option>
+                        </select>
+                        <button class="button button-quiet" type="button" onclick="refreshAvailableDevices({ announce: true })">Retry</button>
+                    </div>
+                    <span id="deviceSelectState" class="helper-text" role="status">Loading current device-registry state…</span>
+                    <span class="helper-text">Registration without a device remains supported; monitoring starts after assignment.</span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="button button-secondary" type="button" onclick="closeDialog('registrationDialog')">Cancel</button>
+                <button id="registrationSubmit" class="button button-primary" type="submit">Register patient</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="noteBox" class="modal modal-small" aria-labelledby="noteBoxTitle">
+        <form id="noteForm" method="dialog">
+            <div class="modal-heading">
+                <div>
+                    <p class="eyebrow">Workflow event</p>
+                    <h2 id="noteBoxTitle">Post note</h2>
+                </div>
+                <button class="icon-button" type="button" aria-label="Close action dialog" onclick="closeDialog('noteBox')">×</button>
+            </div>
+            <p class="selected-context">Patient: <strong id="noteBoxPatient">None</strong></p>
+            <label>
+                Note
+                <textarea id="noteText" rows="4" placeholder="Optional context for the timeline"></textarea>
+            </label>
+            <div class="modal-actions">
+                <button class="button button-secondary" type="button" onclick="closeDialog('noteBox')">Cancel</button>
+                <button id="noteSubmit" class="button button-primary" type="submit">Save action</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="handoffChoiceBox" class="modal modal-small" aria-labelledby="handoffChoiceTitle">
+        <div class="modal-heading">
+            <div>
+                <p class="eyebrow">Encounter closed</p>
+                <h2 id="handoffChoiceTitle">Patient dismissed</h2>
+            </div>
+        </div>
+        <p>Generate a handoff summary for the dismissed encounter?</p>
+        <div class="modal-actions">
+            <button class="button button-secondary" type="button" onclick="confirmHandoffNo()">Not now</button>
+            <button class="button button-primary" type="button" onclick="confirmHandoffYes()">Generate handoff</button>
+        </div>
+    </dialog>
+
+    <dialog id="deviceRemovalDialog" class="modal modal-small" aria-labelledby="deviceRemovalTitle">
+        <form id="deviceRemovalForm" method="dialog">
+            <div class="modal-heading">
+                <div>
+                    <p class="eyebrow">Registry lifecycle</p>
+                    <h2 id="deviceRemovalTitle">Remove device</h2>
+                </div>
+                <button class="icon-button" type="button" aria-label="Close device removal" onclick="closeDialog('deviceRemovalDialog')">×</button>
+            </div>
+            <div id="deviceRemovalMessage" class="form-message" hidden></div>
+            <p id="deviceRemovalPrompt"></p>
+            <dl class="device-removal-summary">
+                <div><dt>Device ID</dt><dd id="removeDeviceId">—</dd></div>
+                <div><dt>Type</dt><dd id="removeDeviceType">—</dd></div>
+                <div><dt>Status</dt><dd id="removeDeviceStatus">—</dd></div>
+                <div><dt>Assignment</dt><dd id="removeDeviceAssignment">—</dd></div>
+            </dl>
+            <p id="deviceRemovalDisposition" class="inline-notice"></p>
+            <label>
+                Retirement reason
+                <textarea id="deviceRemovalReason" rows="3" maxlength="500" placeholder="Optional reason for historical context"></textarea>
+                <span class="helper-text">Saved only when historical dependencies require retirement.</span>
+            </label>
+            <div class="modal-actions">
+                <button class="button button-secondary" type="button" onclick="closeDialog('deviceRemovalDialog')">Cancel</button>
+                <button id="deviceRemovalSubmit" class="button button-danger" type="submit">Remove device</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 </html>

@@ -1,0 +1,16 @@
+{
+  "database_bytes": 114688,
+  "database_file": "device_lifecycle.db",
+  "foreign_key_check": [],
+  "integrity_check": "ok",
+  "tables": {
+    "devices": 5,
+    "encounters": 3,
+    "latest_patient_state": 2,
+    "packet_logs": 2,
+    "patient_events": 6,
+    "patient_profiles": 2,
+    "recent_vitals": 1,
+    "recheck_timers": 0
+  }
+}

@@ -1,0 +1,6 @@
+COMMAND: C:\Users\hassa\AppData\Local\Programs\Python\Python311\python.exe -c import database, models, packet_validation, services, server
+EXIT: 0
+
+
+COMMAND: C:\Users\hassa\AppData\Local\Programs\Python\Python311\python.exe -c from processing import hr_spo2, ppg_pipeline, ppg_quality, respiratory_rate
+EXIT: 0

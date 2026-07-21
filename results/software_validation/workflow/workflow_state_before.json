@@ -1,0 +1,16 @@
+{
+  "database_bytes": 114688,
+  "database_file": "workflow.db",
+  "foreign_key_check": [],
+  "integrity_check": "ok",
+  "tables": {
+    "devices": 0,
+    "encounters": 0,
+    "latest_patient_state": 0,
+    "packet_logs": 0,
+    "patient_events": 0,
+    "patient_profiles": 0,
+    "recent_vitals": 0,
+    "recheck_timers": 0
+  }
+}

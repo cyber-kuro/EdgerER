@@ -1,0 +1,32 @@
+test_case,initial_state,action,expected_state,actual_state,database_verification,api_verification,pass,duration_ms
+create/register device,missing,POST register_device,True,True,True,True,True,0.0
+online device assignable,AVAILABLE,refresh registry,True,True,True,True,True,0.0
+offline excluded,not started,calculate eligibility,False,False,True,True,True,0.0
+successful assignment updates registry,available,assign,P-LIFE,P-LIFE,True,True,True,0.0
+assigned device excluded,assigned,list,False,False,True,True,True,0.0
+encounter stores assignment,active encounter,inspect,D-LIFE-AVAILABLE,D-LIFE-AVAILABLE,True,True,True,0.0
+NEEDS_CLEANING excluded,cleaning,list,False,False,True,True,True,0.0
+SENSOR_FAULT excluded,fault,list,False,False,True,True,True,0.0
+unknown assignment rejected,unknown,assign,400,400,True,True,True,0.0
+double assignment rejected,assigned,assign,409,409,True,True,True,0.0
+race assignment rejected,one device,two concurrent assignments,1,1,True,True,True,0.0
+offline assignment remains linked,assigned,age last_seen,P-LIFE,P-LIFE,True,True,True,0.0
+reconnection preserves assignment,offline assigned,send packet,True,True,True,True,True,0.0
+assigned device cannot be removed,assigned,DELETE,409,409,True,True,True,0.0
+dismissal applies cleaning policy,assigned,dismiss,NEEDS_CLEANING,NEEDS_CLEANING,True,True,True,0.0
+released device clean transition,NEEDS_CLEANING,mark clean,AVAILABLE,AVAILABLE,True,True,True,0.0
+readmission does not reuse device,prior assignment,readmit,,,True,True,True,0.0
+unused device permanently deleted,unused,DELETE,deleted,deleted,True,True,True,0.0
+packet-history device retired,historical,DELETE,retired,retired,True,True,True,0.0
+encounter-history device retired,historical,inspect,False,False,True,True,True,0.0
+retired hidden from active view,retired,GET devices,False,False,True,True,True,0.0
+retired included on request,retired,GET include_retired,True,True,True,True,True,0.0
+historical references preserved,retired,inspect encounters,True,True,True,True,True,0.0
+retired packet rejected,retired,POST vitals,409,409,True,True,True,0.0
+restart preserves retirement,retired,reload state,False,False,True,True,True,0.0
+restore action,retired,POST restore,True,True,True,True,True,0.0
+restored remains unassigned,restored,inspect,,,True,True,True,0.0
+counts exclude retired,mixed registry,calculate,0,0,True,True,True,0.0
+dropdown eligibility reflects lifecycle,restored available state,assignable filter,True,True,True,True,True,0.0
+active encounter remains unique,readmitted,inspect,1,1,True,True,True,0.0
+prior encounter retained,readmitted,inspect,2,2,True,True,True,0.0

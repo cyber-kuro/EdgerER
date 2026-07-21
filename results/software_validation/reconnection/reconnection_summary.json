@@ -1,0 +1,9 @@
+{
+  "configured_offline_timeout_seconds": 15,
+  "cycles": 10,
+  "failed": 0,
+  "mean_detection_seconds": 16.106666059995767,
+  "mean_recovery_ms": 41.63968000211753,
+  "p95_recovery_ms": 44.78617000859231,
+  "passed": 10
+}

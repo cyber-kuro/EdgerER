@@ -1,3 +1,4 @@
+import argparse
 import time
 import random
 import requests
@@ -228,6 +229,11 @@ def send_packet(packet):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Send EdgeER demonstration packets to the local server.",
+    )
+    parser.parse_args()
+
     print("Starting EdgeER dummy node simulator")
     print(f"Sending to: {SERVER_URL}")
     print("Press Ctrl+C to stop")

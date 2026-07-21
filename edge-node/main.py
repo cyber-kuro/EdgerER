@@ -87,6 +87,7 @@ def build_packet(
     pulse: Dict[str, Any],
     packet_sequence: int,
     rr_fields: Optional[Dict[str, Any]] = None,
+    rr_fresh: bool = True,
     now_utc: Optional[datetime] = None,
 ) -> Dict[str, Any]:
     send_time = utc_iso_string(now_utc)
@@ -104,9 +105,10 @@ def build_packet(
         **(rr_fields or unavailable_rr_fields()),
     }
 
-    # RR remains research-only on the Pi. The existing risk engine and local
-    # alert behavior do not consume respiratory-rate fields.
-    packet.update(evaluate_risk(packet))
+    # RR remains research-only and locally provisional. The risk engine can
+    # raise GREEN to YELLOW only when the shared pipeline supplied an eligible,
+    # fresh estimate; the server remains authoritative for dashboard workflow.
+    packet.update(evaluate_risk(packet, rr_fresh=rr_fresh))
     return packet
 
 
@@ -195,6 +197,7 @@ def main() -> None:
 
             pulse = pipeline.get_pulse_packet_fields(now_monotonic)
             rr_fields = pipeline.get_rr_packet_fields(now_monotonic)
+            rr_fresh = pipeline.freshness(now_monotonic)["rr_fresh"]
             temp = _read_temperature(temp_sensor)
             motion = _poll_motion_preserving_packet_behavior(motion_sensor)
 
@@ -205,6 +208,7 @@ def main() -> None:
                 pulse=pulse,
                 packet_sequence=packet_sequence,
                 rr_fields=rr_fields,
+                rr_fresh=rr_fresh,
             )
 
             alerts.set_status(packet["status"])

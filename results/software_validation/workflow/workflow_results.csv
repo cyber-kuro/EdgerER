@@ -1,0 +1,4 @@
+scenario,patient_id,old_encounter_id,new_encounter_id,checks_total,checks_passed,pass,failed_checks,duration_ms
+1,P-WORKFLOW-1,ENC-abeeff18-d01a-4c90-9804-07521a1e1b91,ENC-363afe47-2e81-44c8-86db-c489b4bf8a55,15,15,True,,515.4722000006586
+2,P-WORKFLOW-2,ENC-d7796f63-199b-4ad6-bf12-ce0f9df625ba,ENC-dd3c86b1-d572-4341-91fc-17e5574b4cd8,15,15,True,,474.1970000322908
+3,P-WORKFLOW-3,ENC-4203299a-1f2c-41b6-8e68-3d7114aa3576,ENC-213dd02f-f7b0-46d1-932f-5fd4d599c2ab,15,15,True,,461.92560001509264

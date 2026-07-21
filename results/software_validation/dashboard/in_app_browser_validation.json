@@ -1,0 +1,21 @@
+{
+  "captured_at_utc": "2026-07-21T01:12:00Z",
+  "database": "isolated temporary SQLite fixture",
+  "target": "http://127.0.0.1:8770/",
+  "checks": {
+    "dashboard_loaded": true,
+    "prototype_disclaimer_visible": true,
+    "empty_state_rendered": true,
+    "active_and_priority_patients_rendered": true,
+    "offline_state_distinct": true,
+    "registration_modal_opened": true,
+    "patient_detail_opened": true,
+    "handoff_generated": true,
+    "retired_device_filter_enabled": true,
+    "retired_device_visible": true
+  },
+  "screenshots": 10,
+  "console_warning_or_error_entries": 0,
+  "failed_network_request_capture": "not exposed by the available in-app browser interface",
+  "note": "This supplements the reproducible API/template checks. Standalone Playwright and Selenium were not installed."
+}

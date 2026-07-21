@@ -1,194 +1,30 @@
+const MISSING_VALUE = '—';
+const RELIABLE_RR_QUALITIES = new Set(['GOOD', 'MODERATE']);
+const POLL_INTERVAL_MS = 3000;
+
+let selectedPatient = null;
+let chart = null;
+let pendingActionType = null;
+let pendingHandoffPatientId = null;
+let pendingDeviceRemoval = null;
+let lastDevices = [];
+let pollInFlight = false;
+
 let lastAlertStatus = {};
 let alertIntervals = {};
 let mutedPatients = {};
 let recheckIntervals = {};
-
 let audioEnabled = false;
 let audioCtx = null;
 
-function enableSound() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    audioCtx.resume();
-    audioEnabled = true;
-    alert("Alert sound enabled");
-}
-
-function playTone(frequency, duration, gainValue, startDelay = 0, waveType = "sine") {
-    if (!audioEnabled || !audioCtx) return;
-
-    const oscillator = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    oscillator.type = waveType;
-    oscillator.frequency.value = frequency;
-
-    oscillator.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    const startTime = audioCtx.currentTime + startDelay;
-    const stopTime = startTime + duration;
-
-    gain.gain.setValueAtTime(gainValue, startTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, stopTime);
-
-    oscillator.start(startTime);
-    oscillator.stop(stopTime);
-}
-
-// Keep these globals as you already have them:
-// audioEnabled, audioCtx, mutedPatients, alertIntervals
-
-const ALARM_PATTERNS = {
-    ORANGE: {
-        // Medium priority: slower, softer 3-beep pattern
-        repeatMs: 3500,
-        tones: [
-            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.00, wave: "sine" },
-            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.18, wave: "sine" },
-            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.36, wave: "sine" }
-        ]
-    },
-
-    RED: {
-        // High priority: sharper 5-beep monitor-style burst
-        repeatMs: 1800,
-        tones: [
-            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.00, wave: "triangle" },
-            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.13, wave: "triangle" },
-            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.26, wave: "triangle" },
-            { freq: 760, duration: 0.10, volume: 0.13, delay: 0.42, wave: "triangle" },
-            { freq: 760, duration: 0.10, volume: 0.13, delay: 0.57, wave: "triangle" }
-        ]
-    },
-
-    CRASHING: {
-        // Very urgent: faster, harsher repeated high-priority pattern
-        repeatMs: 950,
-        tones: [
-            { freq: 1100, duration: 0.07, volume: 0.16, delay: 0.00, wave: "square" },
-            { freq: 900,  duration: 0.07, volume: 0.16, delay: 0.11, wave: "square" },
-            { freq: 1100, duration: 0.07, volume: 0.16, delay: 0.22, wave: "square" },
-            { freq: 900,  duration: 0.07, volume: 0.16, delay: 0.33, wave: "square" },
-            { freq: 700,  duration: 0.12, volume: 0.18, delay: 0.48, wave: "square" }
-        ]
-    }
-};
-
-function playBeep(type) {
-    if (!audioEnabled || !audioCtx) return;
-
-    const pattern = ALARM_PATTERNS[type];
-    if (!pattern) return;
-
-    if (audioCtx.state === "suspended") {
-        audioCtx.resume().catch(() => {});
-    }
-
-    pattern.tones.forEach(tone => {
-        playTone(
-            tone.freq,
-            tone.duration,
-            tone.volume,
-            tone.delay,
-            tone.wave
-        );
-    });
-}
-
-function isAlertStatus(status) {
-    return status === "ORANGE" || status === "RED" || status === "CRASHING";
-}
-
-function getBeepType(status) {
-    if (status === "ORANGE") return "ORANGE";
-    if (status === "RED") return "RED";
-    if (status === "CRASHING") return "CRASHING";
-    return null;
-}
-
-function startAlertLoop(patientId, status) {
-    if (!audioEnabled || !audioCtx) return;
-    if (mutedPatients[patientId]) return;
-
-    const beepType = getBeepType(status);
-    if (!beepType) return;
-
-    // If same alarm is already running, do nothing
-    if (
-        alertIntervals[patientId] &&
-        alertIntervals[patientId].beepType === beepType
-    ) {
-        return;
-    }
-
-    // If status changed, stop the old alarm first
-    stopAlertLoop(patientId);
-
-    alertIntervals[patientId] = {
-        beepType,
-        timer: null
-    };
-
-    const loop = () => {
-        if (!audioEnabled || !audioCtx || mutedPatients[patientId]) {
-            stopAlertLoop(patientId);
-            return;
-        }
-
-        const current = alertIntervals[patientId];
-        if (!current) return;
-
-        const pattern = ALARM_PATTERNS[current.beepType];
-        if (!pattern) return;
-
-        playBeep(current.beepType);
-
-        current.timer = setTimeout(loop, pattern.repeatMs);
-    };
-
-    // Start immediately
-    loop();
-}
-
-function stopAlertLoop(patientId) {
-    const existing = alertIntervals[patientId];
-    if (!existing) return;
-
-    if (existing.timer !== null) {
-        clearTimeout(existing.timer);
-    }
-
-    delete alertIntervals[patientId];
-}
-
-function updatePatientAlertSound(patientId, status) {
-    if (isAlertStatus(status)) {
-        startAlertLoop(patientId, status);
-    } else {
-        stopAlertLoop(patientId);
+class ApiError extends Error {
+    constructor(message, payload = {}, status = 0) {
+        super(message);
+        this.name = 'ApiError';
+        this.payload = payload;
+        this.status = status;
     }
 }
-
-function mutePatient(patientId) {
-    mutedPatients[patientId] = true;
-    stopAlertLoop(patientId);
-}
-
-function formatDuration(seconds) {
-    if (seconds < 60) return `${seconds}s ago`;
-
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}m ago`;
-}
-
-let selectedPatient = null;
-let chart = null;
-
-const RELIABLE_RR_QUALITIES = new Set(['GOOD', 'MODERATE']);
 
 function escapeHtml(value) {
     return String(value)
@@ -199,9 +35,137 @@ function escapeHtml(value) {
         .replaceAll("'", '&#039;');
 }
 
+function escapeAttribute(value) {
+    return escapeHtml(value).replaceAll('`', '&#096;');
+}
+
+function showToast(message, type = 'info') {
+    const region = document.getElementById('toastRegion');
+    if (!region) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.textContent = message;
+    region.appendChild(toast);
+
+    window.setTimeout(() => toast.remove(), 4500);
+}
+
+function setServerState(state, text) {
+    const badge = document.getElementById('serverState');
+    const label = document.getElementById('serverStateText');
+    if (!badge || !label) return;
+    badge.className = `connection-badge state-${state}`;
+    label.textContent = text;
+}
+
+async function apiRequest(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        const payload = await response.json().catch(() => ({}));
+        setServerState('online', 'Server connected');
+
+        if (!response.ok || payload.ok === false || payload.accepted === false) {
+            throw new ApiError(
+                payload.error || `Request failed with status ${response.status}`,
+                payload,
+                response.status
+            );
+        }
+        return payload;
+    } catch (error) {
+        if (!(error instanceof ApiError)) {
+            setServerState('error', 'Server unavailable');
+            throw new ApiError('Could not reach the EdgeER server.');
+        }
+        throw error;
+    }
+}
+
+function statusClass(value) {
+    return `status-${String(value || 'unknown')
+        .toLowerCase()
+        .replaceAll('_', '-')
+        .replace(/[^a-z0-9-]/g, '-')}`;
+}
+
+function statusBadge(value) {
+    const label = value || 'UNKNOWN';
+    return `<span class="status-badge ${statusClass(label)}">${escapeHtml(label)}</span>`;
+}
+
+function formatNumber(value, digits = 1) {
+    if (value === null || value === undefined || value === '') return MISSING_VALUE;
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue)
+        ? numericValue.toFixed(digits).replace(/\.0$/, '')
+        : MISSING_VALUE;
+}
+
+function formatTemperature(packet) {
+    const value = packet?.object_temp_c
+        ?? packet?.temperature_c
+        ?? packet?.temperature;
+    return value === null || value === undefined
+        ? MISSING_VALUE
+        : `${formatNumber(value, 1)} °C`;
+}
+
+function formatDuration(seconds) {
+    if (seconds === null || seconds === undefined) return 'Not started';
+    const safeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+    if (safeSeconds < 60) return `${safeSeconds}s ago`;
+
+    const minutes = Math.floor(safeSeconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes ? `${hours}h ${remainingMinutes}m ago` : `${hours}h ago`;
+}
+
+function parseTimestamp(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatTimestamp(value) {
+    const date = parseTimestamp(value);
+    if (!date) return value ? escapeHtml(value) : MISSING_VALUE;
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    }).format(date);
+}
+
+function formatTimeOnly(value) {
+    const date = parseTimestamp(value);
+    if (!date) return MISSING_VALUE;
+    return new Intl.DateTimeFormat(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    }).format(date);
+}
+
+function formatCountdown(seconds) {
+    const safeSeconds = Math.max(0, Number(seconds || 0));
+    if (safeSeconds < 60) return `${Math.floor(safeSeconds)}s`;
+    const minutes = Math.floor(safeSeconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+}
+
 function hasRrMetadata(packet) {
     if (!packet) return false;
-
     return [
         packet.resp_rate_bpm,
         packet.rr_source,
@@ -221,513 +185,576 @@ function rrQualityClass(quality) {
 }
 
 function formatRrConfidence(value) {
-    if (value === null || value === undefined || value === '') return '--';
+    if (value === null || value === undefined || value === '') return MISSING_VALUE;
     const numericValue = Number(value);
-    return Number.isFinite(numericValue) ? numericValue.toFixed(2) : '--';
+    return Number.isFinite(numericValue) ? numericValue.toFixed(2) : MISSING_VALUE;
 }
 
 function format_rr(packet) {
-    if (!hasRrMetadata(packet)) return '--';
+    if (!hasRrMetadata(packet)) {
+        return '<span class="rr-inline rr-unreliable">No RR data</span>';
+    }
 
     const quality = normalizeRrQuality(packet.rr_quality);
     const qualityClass = rrQualityClass(quality);
     const source = escapeHtml(packet.rr_source || 'UNAVAILABLE');
     const confidence = formatRrConfidence(packet.rr_confidence);
+    const numericRate = Number(packet.resp_rate_bpm);
     const hasRate = packet.resp_rate_bpm !== null
-        && packet.resp_rate_bpm !== undefined;
-    const rate = hasRate && Number.isFinite(Number(packet.resp_rate_bpm))
-        ? Number(packet.resp_rate_bpm).toFixed(1)
-        : null;
-    const valueText = rate === null
-        ? `withheld (${escapeHtml(quality)}, ${confidence})`
-        : `${rate} bpm (${escapeHtml(quality)}, ${confidence})`;
+        && packet.resp_rate_bpm !== undefined
+        && Number.isFinite(numericRate);
+    const reliable = hasRate
+        && RELIABLE_RR_QUALITIES.has(quality)
+        && packet.rr_fresh !== false;
+
+    let valueText = `Withheld · ${quality}`;
+    if (reliable) {
+        valueText = `${numericRate.toFixed(1)} breaths/min`;
+    } else if (hasRate && packet.rr_fresh === false) {
+        valueText = 'Stale / withheld';
+    }
 
     return `
-        <span class="rr-inline ${qualityClass}">${valueText}</span>
-        <span class="rr-source">${source}</span>
+        <span class="rr-inline ${qualityClass}">${escapeHtml(valueText)}</span>
+        <span class="rr-source">${source} · confidence ${confidence}</span>
     `;
-}
-
-function formatTemperature(packet) {
-    return packet.object_temp_c
-        ?? packet.temperature_c
-        ?? packet.temperature
-        ?? '--';
 }
 
 function renderResearchRr(packet) {
     const detail = document.getElementById('researchRrDetail');
+    if (!detail) return;
 
     if (!hasRrMetadata(packet)) {
         detail.className = 'rr-detail rr-unavailable';
-        detail.innerHTML = 'No PPG-derived RR metadata reported.';
+        detail.innerHTML = '<strong>No RR data</strong><span class="rr-disclaimer">The device has not reported PPG-derived RR metadata for this encounter.</span>';
         return;
     }
 
     const quality = normalizeRrQuality(packet.rr_quality);
     const qualityClass = rrQualityClass(quality);
-    const source = escapeHtml(packet.rr_source || 'UNAVAILABLE');
-    const confidence = formatRrConfidence(packet.rr_confidence);
+    const numericRate = Number(packet.resp_rate_bpm);
     const hasRate = packet.resp_rate_bpm !== null
         && packet.resp_rate_bpm !== undefined
-        && Number.isFinite(Number(packet.resp_rate_bpm));
-    const reliable = hasRate && RELIABLE_RR_QUALITIES.has(quality);
-    const valueText = hasRate
-        ? `${Number(packet.resp_rate_bpm).toFixed(1)} breaths/min`
-        : 'Pending / withheld';
+        && Number.isFinite(numericRate);
+    const reliable = hasRate
+        && RELIABLE_RR_QUALITIES.has(quality)
+        && packet.rr_fresh !== false;
+    const valueText = reliable
+        ? `${numericRate.toFixed(1)} breaths/min`
+        : packet.rr_fresh === false && hasRate
+            ? 'Stale / withheld'
+            : 'Pending / withheld';
     const caution = reliable
-        ? quality === 'MODERATE'
-            ? 'Acceptable research estimate; interpret with caution.'
-            : 'Acceptable research estimate.'
-        : 'Withheld or unreliable research estimate.';
+        ? 'Eligible research estimate; not used for server priority status.'
+        : 'Technical RR state only; no numeric value is used as deterioration evidence.';
 
     detail.className = `rr-detail ${qualityClass}`;
     detail.innerHTML = `
-        <div><b>PPG-derived RR:</b> ${valueText}</div>
-        <div><b>Quality:</b>
+        <strong>${escapeHtml(valueText)}</strong>
+        <div class="rr-detail-row">
             <span class="rr-quality ${qualityClass}">${escapeHtml(quality)}</span>
+            <span>Confidence ${formatRrConfidence(packet.rr_confidence)}</span>
+            <span>Source ${escapeHtml(packet.rr_source || 'UNAVAILABLE')}</span>
         </div>
-        <div><b>Confidence:</b> ${confidence}</div>
-        <div><b>Source:</b> ${source}</div>
-        <div class="rr-disclaimer">${caution} Not used for priority status.</div>
+        <span class="rr-disclaimer">${escapeHtml(caution)}</span>
     `;
 }
 
-async function loadPatients() {
-    const patients = await fetch('/api/patients').then(r => r.json());
-    const activePatientIds = new Set(
-        patients.map(patient => patient.patient_id)
-    );
+function patientRowHtml(patient) {
+    const patientId = String(patient.patient_id || MISSING_VALUE);
+    const displayName = patient.display_name && patient.display_name !== patientId
+        ? patient.display_name
+        : '';
+    const reasons = (patient.reasons || []).length
+        ? patient.reasons.join(', ')
+        : MISSING_VALUE;
+    const recheck = patient.recheck_due
+        ? '<span class="RECHECK_BADGE">RECHECK DUE</span>'
+        : patient.recheck_seconds_left !== null
+            ? `<span class="cell-secondary">Recheck in ${formatCountdown(patient.recheck_seconds_left)}</span>`
+            : MISSING_VALUE;
+    const deescalateButton = patient.priority
+        ? `<button class="button button-small button-secondary" type="button" data-deescalate-patient="${escapeAttribute(patientId)}">De-escalate</button>`
+        : '';
+    const alertButton = isAlertStatus(patient.status)
+        ? `<button class="button button-small button-secondary" type="button" data-mute-patient="${escapeAttribute(patientId)}">${mutedPatients[patientId] ? 'Muted' : 'Mute'}</button>`
+        : MISSING_VALUE;
 
+    return `
+        <tr tabindex="0" data-patient-id="${escapeAttribute(patientId)}" data-priority="${Boolean(patient.priority)}" data-selected="${patientId === selectedPatient}">
+            <td data-column="patient">
+                <span class="cell-primary">${escapeHtml(patientId)}</span>
+                ${displayName ? `<span class="cell-secondary">${escapeHtml(displayName)}</span>` : ''}
+            </td>
+            <td data-column="complaint">${escapeHtml(patient.chief_complaint || MISSING_VALUE)}</td>
+            <td data-column="triage">${escapeHtml(patient.triage_level || MISSING_VALUE)}</td>
+            <td data-column="location">${escapeHtml(patient.location || MISSING_VALUE)}</td>
+            <td data-column="hr" class="numeric">${formatNumber(patient.heart_rate_bpm)}</td>
+            <td data-column="spo2" class="numeric">${formatNumber(patient.spo2_percent)}</td>
+            <td data-column="temp" class="numeric">${formatTemperature(patient)}</td>
+            <td data-column="rr">${format_rr(patient)}</td>
+            <td data-column="status">${statusBadge(patient.status)}</td>
+            <td data-column="reasons" class="reasons-cell">${escapeHtml(reasons)}</td>
+            <td data-column="last-seen">${patient.seconds_since_seen === null ? 'Not started' : formatDuration(patient.seconds_since_seen)}</td>
+            <td data-column="workflow" class="workflow-cell">${recheck}${deescalateButton ? `<br>${deescalateButton}` : ''}</td>
+            <td data-column="alert">${alertButton}</td>
+        </tr>
+    `;
+}
+
+function renderPatientTable(table, patients, emptyMessage) {
+    if (!patients.length) {
+        table.innerHTML = `<tr><td colspan="13" class="table-state">${escapeHtml(emptyMessage)}</td></tr>`;
+        return;
+    }
+    table.innerHTML = patients.map(patientRowHtml).join('');
+}
+
+async function loadPatients({ announce = false } = {}) {
     const priorityTable = document.getElementById('priorityPatientsTable');
     const allTable = document.getElementById('patientsTable');
+    const priorityState = document.getElementById('prioritySectionState');
+    const allState = document.getElementById('patientsSectionState');
 
-    priorityTable.innerHTML = '';
-    allTable.innerHTML = '';
+    priorityState.textContent = 'Refreshing…';
+    allState.textContent = 'Refreshing…';
 
-    patients.forEach(p => {
-        if (p.recheck_due) {
-            startRecheckLoop(p.patient_id);
-        } else {
-            stopRecheckLoop(p.patient_id);
-        }
+    try {
+        const patients = await apiRequest('/api/patients');
+        const priorityPatients = patients.filter(patient => patient.priority);
+        const otherPatients = patients.filter(patient => !patient.priority);
+        const activePatientIds = new Set(patients.map(patient => patient.patient_id));
 
-        const rowHtml = `
-            <tr onclick="selectPatient('${p.patient_id}')" style="cursor:pointer">
-                <td data-column="patient">${p.patient_id || '--'}</td>
-                <td data-column="complaint">${p.chief_complaint || '--'}</td>
-                <td data-column="triage">${p.triage_level || '--'}</td>
-                <td data-column="location">${p.location || '--'}</td>
-                <td data-column="hr">${p.heart_rate_bpm ?? '--'}</td>
-                <td data-column="spo2">${p.spo2_percent ?? '--'}</td>
-                <td data-column="temp">${formatTemperature(p)}</td>
-                <td data-column="rr">${format_rr(p)}</td>
-                <td data-column="status" class="${p.status || ''}">${p.status || '--'}</td>
-                <td data-column="reasons">${(p.reasons || []).join(', ')}</td>
-                <td data-column="last-seen">${
-                    p.seconds_since_seen === null
-                    ? 'Not started'
-                    : formatDuration(p.seconds_since_seen || 0)
-                }</td>
+        renderPatientTable(priorityTable, priorityPatients, 'No priority patients.');
+        renderPatientTable(allTable, otherPatients, 'No other active patients.');
+        priorityState.textContent = `${priorityPatients.length} current`;
+        allState.textContent = `${otherPatients.length} current`;
+        document.getElementById('activePatientCount').textContent = patients.length;
+        document.getElementById('priorityPatientCount').textContent = priorityPatients.length;
 
-                <td data-column="workflow">
-                    ${
-                        p.recheck_due
-                        ? `<span class="RECHECK_BADGE">RECHECK</span>`
-                        : p.recheck_seconds_left !== null
-                            ? `Recheck in ${formatCountdown(p.recheck_seconds_left)}`
-                            : ''
-                    }
+        patients.forEach(patient => {
+            if (patient.recheck_due) startRecheckLoop(patient.patient_id);
+            else stopRecheckLoop(patient.patient_id);
+            updatePatientAlertSound(patient.patient_id, patient.status);
+            if (patient.status === 'GREEN') mutedPatients[patient.patient_id] = false;
+            lastAlertStatus[patient.patient_id] = patient.status;
+        });
 
-                    ${
-                        p.priority
-                        ? `<br><button onclick="event.stopPropagation(); selectedPatient='${p.patient_id}'; openNoteBox('De-escalated / dismissed from priority')">
-                                De-escalate
-                        </button>`
-                        : ''
-                    }
-                </td>
+        Object.keys(alertIntervals).forEach(patientId => {
+            if (!activePatientIds.has(patientId)) stopAlertLoop(patientId);
+        });
+        Object.keys(recheckIntervals).forEach(patientId => {
+            if (!activePatientIds.has(patientId)) stopRecheckLoop(patientId);
+        });
 
-                <td data-column="alert">
-                    ${
-                        isAlertStatus(p.status)
-                        ? `<button onclick="event.stopPropagation(); mutePatient('${p.patient_id}')">Mute</button>`
-                        : ''
-                    }
-                </td>
-            </tr>
-        `;
-
-        if (p.priority) {
-            priorityTable.innerHTML += rowHtml;
-        } else {
-            allTable.innerHTML += rowHtml;
-        }
-
-        if (isAlertStatus(p.status)) {
-            startAlertLoop(p.patient_id, p.status);
-        } else {
-            stopAlertLoop(p.patient_id);
-
-            if (p.status === "GREEN") {
-                mutedPatients[p.patient_id] = false;
-            }
-        }
-    });
-
-    Object.keys(alertIntervals).forEach(patientId => {
-        if (!activePatientIds.has(patientId)) {
-            stopAlertLoop(patientId);
-        }
-    });
-
-    Object.keys(recheckIntervals).forEach(patientId => {
-        if (!activePatientIds.has(patientId)) {
-            stopRecheckLoop(patientId);
-        }
-    });
+        if (announce) showToast('Patient state refreshed.', 'success');
+        return patients;
+    } catch (error) {
+        const retry = '<button class="button button-small button-secondary" type="button" onclick="loadPatients({ announce: true })">Retry</button>';
+        priorityTable.innerHTML = `<tr><td colspan="13" class="table-state table-state-error">Could not load priority patients. ${retry}</td></tr>`;
+        allTable.innerHTML = `<tr><td colspan="13" class="table-state table-state-error">Could not load active patients. ${retry}</td></tr>`;
+        priorityState.textContent = 'Request failed';
+        allState.textContent = 'Request failed';
+        document.getElementById('activePatientCount').textContent = MISSING_VALUE;
+        document.getElementById('priorityPatientCount').textContent = MISSING_VALUE;
+        if (announce) showToast(error.message, 'error');
+        throw error;
+    }
 }
 
-async function loadDevices() {
-    const devices = await fetch('/api/devices').then(r => r.json());
-    const devicesTable = document.getElementById('devicesTable');
-    devicesTable.innerHTML = '';
-
-    devices.forEach(device => {
-        let lastSeen = 'Not started';
-
-        if (device.last_seen) {
-            const lastSeenDate = new Date(device.last_seen);
-            if (!Number.isNaN(lastSeenDate.getTime())) {
-                const seconds = Math.max(
-                    0,
-                    Math.floor((Date.now() - lastSeenDate.getTime()) / 1000)
-                );
-                lastSeen = formatDuration(seconds);
-            }
-        }
-
-        devicesTable.innerHTML += `
-            <tr>
-                <td>${device.device_id || '--'}</td>
-                <td>${device.device_type || 'UNKNOWN'}</td>
-                <td>${device.assigned_patient_id || '--'}</td>
-                <td class="${device.status || ''}">${device.status || '--'}</td>
-                <td>${
-                    device.battery_percent === null
-                    ? '--'
-                    : `${device.battery_percent}%`
-                }</td>
-                <td>${device.wifi_rssi ?? '--'}</td>
-                <td>${lastSeen}</td>
-                <td>${device.firmware_version || '--'}</td>
-            </tr>
-        `;
-    });
+function deviceTypeLabel(value) {
+    const labels = {
+        RASPBERRY_PI: 'Raspberry Pi',
+        ESP32: 'ESP32',
+        SIMULATOR: 'Simulator',
+        UNKNOWN: 'Unknown'
+    };
+    return labels[value] || String(value || 'Unknown').replaceAll('_', ' ');
 }
 
-loadPatients();
-loadDevices();
+function deviceRowHtml(device) {
+    const isRetired = !device.is_active;
+    const assigned = device.assigned_patient_id
+        ? `<span class="cell-primary">${escapeHtml(device.assigned_patient_id)}</span>`
+        : `<span class="cell-secondary">${isRetired ? 'Historical only' : 'Available'}</span>`;
+    const onlineLabel = isRetired ? 'INACTIVE' : (device.online ? 'ONLINE' : 'OFFLINE');
+    const lastSeen = device.last_seen_age_seconds === null
+        ? 'Not started'
+        : formatDuration(device.last_seen_age_seconds);
+    const battery = device.battery_percent === null || device.battery_percent === undefined
+        ? MISSING_VALUE
+        : `${formatNumber(device.battery_percent)}%`;
+    const cleaningAction = !isRetired && device.status === 'NEEDS_CLEANING'
+        ? `<button class="button button-small button-warning" type="button" data-clean-device="${escapeAttribute(device.device_id)}">Mark cleaned</button>`
+        : '';
+    const lifecycleAction = isRetired
+        ? `<button class="button button-small button-secondary" type="button" data-restore-device="${escapeAttribute(device.device_id)}">Restore</button>`
+        : `<button class="button button-small button-danger" type="button" data-remove-device="${escapeAttribute(device.device_id)}">${device.removal_action === 'RETIRE' ? 'Retire device' : 'Remove'}</button>`;
+    const registryState = isRetired
+        ? `${statusBadge('RETIRED')}<span class="cell-secondary">Previous: ${escapeHtml(device.status || MISSING_VALUE)}</span>`
+        : statusBadge(device.status);
+    const retiredDetail = isRetired && device.retired_at
+        ? `<span class="cell-secondary">Retired ${escapeHtml(formatTimestamp(device.retired_at))}</span>`
+        : `<span class="cell-secondary">${escapeHtml(device.firmware_version || MISSING_VALUE)}</span>`;
+    const locationDetail = isRetired && device.retired_reason
+        ? `<span class="cell-primary">${escapeHtml(device.location || MISSING_VALUE)}</span><span class="cell-secondary">Reason: ${escapeHtml(device.retired_reason)}</span>`
+        : escapeHtml(device.location || MISSING_VALUE);
+
+    return `
+        <tr data-device-lifecycle="${isRetired ? 'retired' : 'active'}">
+            <td><span class="cell-primary">${escapeHtml(device.device_id || MISSING_VALUE)}</span>${retiredDetail}</td>
+            <td>${escapeHtml(deviceTypeLabel(device.device_type))}</td>
+            <td>${registryState}</td>
+            <td>${assigned}</td>
+            <td>${statusBadge(onlineLabel)}</td>
+            <td>${lastSeen}</td>
+            <td class="numeric">${battery}</td>
+            <td>${device.sensor_health ? statusBadge(device.sensor_health) : MISSING_VALUE}</td>
+            <td>${locationDetail}</td>
+            <td><div class="row-actions">${cleaningAction}${lifecycleAction}</div></td>
+        </tr>
+    `;
+}
+
+function updateDeviceSelect(devices, { preserveSelection = true } = {}) {
+    const select = document.getElementById('regDevice');
+    const state = document.getElementById('deviceSelectState');
+    if (!select || !state) return;
+
+    const previous = preserveSelection ? select.value : '';
+    const available = devices.filter(device => device.assignable);
+    const previousStillValid = available.some(device => device.device_id === previous);
+
+    const options = ['<option value="">Register without a device</option>'];
+    available.forEach(device => {
+        const location = device.location ? ` · ${device.location}` : '';
+        const age = device.last_seen_age_seconds === null
+            ? ''
+            : ` · ${formatDuration(device.last_seen_age_seconds)}`;
+        const label = `${device.device_id} — ${deviceTypeLabel(device.device_type)} — Online${location}${age}`;
+        options.push(`<option value="${escapeAttribute(device.device_id)}">${escapeHtml(label)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+    select.disabled = false;
+    select.value = previousStillValid ? previous : '';
+
+    if (!available.length) {
+        state.textContent = 'No online and available devices are currently available.';
+    } else {
+        state.textContent = `${available.length} online and available ${available.length === 1 ? 'device' : 'devices'}.`;
+    }
+
+    if (previous && !previousStillValid) {
+        showToast(`Device ${previous} is no longer available; registration will continue without a device unless another is selected.`, 'warning');
+    }
+}
+
+async function loadDevices({ announce = false } = {}) {
+    const table = document.getElementById('devicesTable');
+    const refreshButton = document.getElementById('deviceRefreshButton');
+    const includeRetired = document.getElementById('showRetiredDevices')?.checked === true;
+    if (refreshButton) refreshButton.disabled = true;
+
+    try {
+        const devices = await apiRequest(`/api/devices?include_retired=${includeRetired}`);
+        lastDevices = devices;
+        table.innerHTML = devices.length
+            ? devices.map(deviceRowHtml).join('')
+            : `<tr><td colspan="10" class="table-state">${includeRetired ? 'No active or retired devices are registered.' : 'No active devices are registered. Start a node or register a device to populate this panel.'}</td></tr>`;
+        document.getElementById('onlineDeviceCount').textContent = devices.filter(device => device.is_active && device.online).length;
+        document.getElementById('availableDeviceCount').textContent = devices.filter(device => device.is_active && device.assignable).length;
+        updateDeviceSelect(devices);
+        if (announce) showToast('Device registry refreshed.', 'success');
+        return devices;
+    } catch (error) {
+        table.innerHTML = '<tr><td colspan="10" class="table-state table-state-error">Could not load the device registry. <button class="button button-small button-secondary" type="button" onclick="loadDevices({ announce: true })">Retry</button></td></tr>';
+        document.getElementById('onlineDeviceCount').textContent = MISSING_VALUE;
+        document.getElementById('availableDeviceCount').textContent = MISSING_VALUE;
+        const state = document.getElementById('deviceSelectState');
+        const select = document.getElementById('regDevice');
+        if (state) state.textContent = 'Device registry request failed. Retry to select a device.';
+        if (select) {
+            select.innerHTML = '<option value="">Register without a device</option>';
+            select.disabled = false;
+        }
+        if (announce) showToast(error.message, 'error');
+        throw error;
+    } finally {
+        if (refreshButton) refreshButton.disabled = false;
+    }
+}
+
+async function refreshAvailableDevices({ announce = false } = {}) {
+    const select = document.getElementById('regDevice');
+    const state = document.getElementById('deviceSelectState');
+    const previous = select.value;
+    select.disabled = true;
+    state.textContent = 'Loading current device-registry state…';
+    try {
+        await loadDevices({ announce });
+        if (lastDevices.some(device => device.assignable && device.device_id === previous)) {
+            select.value = previous;
+        }
+    } catch (_) {
+        // loadDevices already rendered the actionable error state.
+    }
+}
+
+async function markDeviceClean(deviceId) {
+    try {
+        await apiRequest('/api/devices/mark_clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: deviceId })
+        });
+        showToast(`Device ${deviceId} marked cleaned.`, 'success');
+        await loadDevices();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
+
+function openDeviceRemoval(deviceId) {
+    const device = lastDevices.find(item => item.device_id === deviceId);
+    if (!device) {
+        showToast(`Device ${deviceId} is no longer in the current registry view.`, 'warning');
+        void loadDevices();
+        return;
+    }
+
+    pendingDeviceRemoval = device;
+    const assigned = device.assigned_patient_id
+        ? `${device.assigned_patient_id} (${device.assigned_encounter_id || 'active encounter'})`
+        : 'Not assigned';
+    document.getElementById('removeDeviceId').textContent = device.device_id;
+    document.getElementById('removeDeviceType').textContent = deviceTypeLabel(device.device_type);
+    document.getElementById('removeDeviceStatus').textContent = device.status || MISSING_VALUE;
+    document.getElementById('removeDeviceAssignment').textContent = assigned;
+    document.getElementById('deviceRemovalPrompt').textContent =
+        `Remove ${device.device_id} from the active device registry? Historical encounter and packet records will be preserved.`;
+
+    const message = document.getElementById('deviceRemovalMessage');
+    const disposition = document.getElementById('deviceRemovalDisposition');
+    const reason = document.getElementById('deviceRemovalReason');
+    const submit = document.getElementById('deviceRemovalSubmit');
+    message.hidden = true;
+    reason.value = '';
+    submit.disabled = false;
+
+    if (device.removal_action === 'BLOCKED') {
+        message.textContent = 'This device is assigned to an active encounter. Release it before removal.';
+        message.hidden = false;
+        disposition.textContent = 'Removal and retirement are blocked while the assignment is active.';
+        reason.disabled = true;
+        submit.disabled = true;
+    } else if (device.removal_action === 'DELETE') {
+        disposition.textContent = 'This unused device has no historical dependencies and will be permanently deleted.';
+        reason.disabled = true;
+    } else {
+        disposition.textContent = 'This device has historical dependencies and will be retired, not deleted.';
+        reason.disabled = false;
+    }
+
+    const dialog = document.getElementById('deviceRemovalDialog');
+    if (!dialog.open) dialog.showModal();
+}
+
+async function removePendingDevice() {
+    if (!pendingDeviceRemoval) return;
+    const submit = document.getElementById('deviceRemovalSubmit');
+    const reason = document.getElementById('deviceRemovalReason').value.trim();
+    const query = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+    submit.disabled = true;
+
+    try {
+        const result = await apiRequest(
+            `/api/devices/${encodeURIComponent(pendingDeviceRemoval.device_id)}${query}`,
+            { method: 'DELETE' }
+        );
+        showToast(result.message, 'success');
+        closeDialog('deviceRemovalDialog');
+        pendingDeviceRemoval = null;
+        await loadDevices();
+    } catch (error) {
+        const message = document.getElementById('deviceRemovalMessage');
+        message.textContent = error.message;
+        message.hidden = false;
+        submit.disabled = false;
+    }
+}
+
+async function restoreDevice(deviceId) {
+    try {
+        const result = await apiRequest(`/api/devices/${encodeURIComponent(deviceId)}/restore`, {
+            method: 'POST'
+        });
+        showToast(result.message || `Device ${deviceId} restored.`, 'success');
+        await loadDevices();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
 
 function selectPatient(patientId) {
     selectedPatient = patientId;
-    loadPatientDetails();
-    loadPatientEvents();
+    document.getElementById('selectedPatient').textContent = patientId;
+    document.getElementById('patientDetailsEmpty').hidden = true;
+    document.getElementById('patientDetailsContent').hidden = false;
+    document.querySelectorAll('tr[data-patient-id]').forEach(row => {
+        row.dataset.selected = String(row.dataset.patientId === patientId);
+    });
+    void Promise.allSettled([loadPatientDetails(), loadPatientEvents()]);
+}
+
+function updateChart(history) {
+    const state = document.getElementById('chartState');
+    const canvas = document.getElementById('patientChart');
+    const recent = history.slice(-20);
+
+    if (!recent.length) {
+        state.textContent = 'No packet history for this encounter.';
+        canvas.hidden = true;
+        return;
+    }
+    if (typeof Chart === 'undefined') {
+        state.textContent = 'Chart library unavailable; tabular history remains available.';
+        canvas.hidden = true;
+        return;
+    }
+
+    state.textContent = `Showing the latest ${recent.length} accepted measurements.`;
+    canvas.hidden = false;
+    const data = {
+        labels: recent.map(packet => formatTimeOnly(packet.timestamp)),
+        datasets: [
+            {
+                label: 'HR bpm',
+                data: recent.map(packet => packet.heart_rate_bpm),
+                borderColor: '#176b75',
+                backgroundColor: '#176b75',
+                tension: 0.2
+            },
+            {
+                label: 'SpO₂ %',
+                data: recent.map(packet => packet.spo2_percent),
+                borderColor: '#247447',
+                backgroundColor: '#247447',
+                tension: 0.2
+            },
+            {
+                label: 'Temp °C',
+                data: recent.map(packet => packet.object_temp_c),
+                borderColor: '#a94f1c',
+                backgroundColor: '#a94f1c',
+                tension: 0.2
+            }
+        ]
+    };
+
+    if (!chart) {
+        chart = new Chart(canvas, {
+            type: 'line',
+            data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    } else {
+        chart.data = data;
+        chart.update();
+    }
 }
 
 async function loadPatientDetails() {
-
     if (!selectedPatient) return;
+    const detailTable = document.getElementById('detailHistory');
 
-    document.getElementById(
-        'selectedPatient'
-    ).innerText = selectedPatient;
+    try {
+        const [history, patients] = await Promise.all([
+            apiRequest('/api/history'),
+            apiRequest('/api/patients')
+        ]);
+        const currentPatient = patients.find(patient => patient.patient_id === selectedPatient);
+        const patientHistory = history.filter(packet => packet.patient_id === selectedPatient);
+        const latestPacket = currentPatient || patientHistory.at(-1) || null;
+        renderResearchRr(latestPacket);
+        updateChart(patientHistory);
 
-    const [history, patients] = await Promise.all([
-        fetch('/api/history').then(r => r.json()),
-        fetch('/api/patients').then(r => r.json())
-    ]);
+        if (!patientHistory.length) {
+            detailTable.innerHTML = '<tr><td colspan="6" class="table-state">No packet history for this encounter.</td></tr>';
+            return;
+        }
 
-    const currentPatient = patients.find(
-        patient => patient.patient_id === selectedPatient
-    );
-    renderResearchRr(currentPatient);
-
-    const patientHistory =
-        history.filter(
-            p => p.patient_id === selectedPatient
-        );
-
-    const recent =
-        patientHistory.slice(-20);
-
-    const labels =
-        recent.map(
-            p => p.timestamp.split(' ')[1]
-        );
-
-    const hrData =
-        recent.map(p => p.heart_rate_bpm);
-
-    const spo2Data =
-        recent.map(p => p.spo2_percent);
-
-    const tempData =
-        recent.map(p => p.object_temp_c);
-
-    if (!chart) {
-
-        const ctx =
-            document.getElementById(
-                'patientChart'
-            );
-
-        chart = new Chart(ctx, {
-
-            type: 'line',
-
-            data: {
-
-                labels: labels,
-
-                datasets: [
-
-                    {
-                        label: 'HR bpm',
-                        data: hrData,
-                        tension: 0.2
-                    },
-
-                    {
-                        label: 'SpO₂ %',
-                        data: spo2Data,
-                        tension: 0.2
-                    },
-
-                    {
-                        label: 'Temp °C',
-                        data: tempData,
-                        tension: 0.2
-                    }
-
-                ]
-            },
-
-            options: {
-                responsive: true,
-                animation: false
-            }
-        });
-
-    } else {
-
-        chart.data.labels = labels;
-
-        chart.data.datasets[0].data = hrData;
-        chart.data.datasets[1].data = spo2Data;
-        chart.data.datasets[2].data = tempData;
-
-        chart.update();
+        detailTable.innerHTML = patientHistory.slice(-10).reverse().map(packet => `
+            <tr>
+                <td data-column="timestamp">${formatTimestamp(packet.timestamp)}</td>
+                <td data-column="hr" class="numeric">${formatNumber(packet.heart_rate_bpm)}</td>
+                <td data-column="spo2" class="numeric">${formatNumber(packet.spo2_percent)}</td>
+                <td data-column="temp" class="numeric">${formatTemperature(packet)}</td>
+                <td data-column="rr">${format_rr(packet)}</td>
+                <td data-column="status">${statusBadge(packet.status)}</td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        detailTable.innerHTML = '<tr><td colspan="6" class="table-state table-state-error">Measurement history request failed. <button class="button button-small button-secondary" type="button" onclick="loadPatientDetails()">Retry</button></td></tr>';
     }
-
-    const detailTable =
-        document.getElementById(
-            'detailHistory'
-        );
-
-    detailTable.innerHTML = '';
-
-    patientHistory
-        .slice(-10)
-        .reverse()
-        .forEach(p => {
-
-        detailTable.innerHTML += `
-        <tr>
-
-            <td data-column="timestamp">${p.timestamp || '--'}</td>
-
-            <td data-column="hr">${p.heart_rate_bpm ?? '--'}</td>
-
-            <td data-column="spo2">${p.spo2_percent ?? '--'}</td>
-
-            <td data-column="temp">${formatTemperature(p)}</td>
-
-            <td data-column="rr">${format_rr(p)}</td>
-
-            <td data-column="status" class="${p.status || ''}">
-                ${p.status || '--'}
-            </td>
-
-        </tr>
-        `;
-    });
-}
-
-setInterval(() => {
-    loadPatients();
-    loadDevices();
-    loadPatientDetails();
-    loadPatientEvents();
-}, 3000);
-
-let pendingActionType = null;
-let pendingHandoffPatientId = null;
-
-function openNoteBox(actionType) {
-    if (!selectedPatient) {
-        alert("Select a patient first");
-        return;
-    }
-
-    pendingActionType = actionType;
-
-    document.getElementById('noteBoxTitle').innerText =
-        `Post note for: ${actionType}`;
-
-    document.getElementById('noteBoxPatient').innerText =
-        selectedPatient;
-
-    document.getElementById('noteText').value = '';
-
-    document.getElementById('noteBox').style.display = 'block';
-
-    document.getElementById('noteText').focus();
-}
-
-async function postNote() {
-    if (!selectedPatient || !pendingActionType) {
-        return;
-    }
-
-    const note = document.getElementById('noteText').value;
-    const completedActionType = pendingActionType;
-    const actionPatientId = selectedPatient;
-
-    const response = await fetch('/api/action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            patient_id: actionPatientId,
-            action_type: completedActionType,
-            note: note
-        })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result.ok) {
-        alert(result.error || "Action could not be completed");
-        return;
-    }
-
-    document.getElementById('noteBox').style.display = 'none';
-    document.getElementById('noteText').value = '';
-
-    pendingActionType = null;
-
-    loadPatients();
-    loadPatientEvents();
-
-    if (completedActionType === "Dismissed to monitoring room") {
-        pendingHandoffPatientId = actionPatientId;
-        document.getElementById('handoffChoiceBox').style.display = 'block';
-    }
-}
-
-function confirmHandoffYes() {
-    const patientId = pendingHandoffPatientId;
-    pendingHandoffPatientId = null;
-    document.getElementById('handoffChoiceBox').style.display = 'none';
-    generateHandoff(patientId);
-}
-
-function confirmHandoffNo() {
-    pendingHandoffPatientId = null;
-    document.getElementById('handoffChoiceBox').style.display = 'none';
 }
 
 async function loadPatientEvents() {
     if (!selectedPatient) return;
-
-    const events = await fetch(`/api/events/${selectedPatient}`)
-        .then(r => r.json());
-
     const timeline = document.getElementById('eventTimeline');
-    timeline.innerHTML = '';
-
-    events.slice(-15).reverse().forEach(e => {
-        timeline.innerHTML += `
-            <tr>
-                <td>${e.time}</td>
-                <td>${e.event_type}</td>
-                <td>${e.note || ''}</td>
-            </tr>
-        `;
-    });
-}
-
-function formatCountdown(seconds) {
-    seconds = Number(seconds || 0);
-
-    if (seconds < 60) return `${seconds}s`;
-
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-
-    return `${hours}h ${remainingMinutes}m`;
-}
-
-function startRecheckLoop(patientId) {
-    if (!audioEnabled || !audioCtx) return;
-
-    if (recheckIntervals[patientId]) return;
-
-    playBeep("ORANGE");
-
-    recheckIntervals[patientId] = setInterval(() => {
-        playBeep("ORANGE");
-    }, 4000);
-}
-
-function stopRecheckLoop(patientId) {
-    if (recheckIntervals[patientId]) {
-        clearInterval(recheckIntervals[patientId]);
-        delete recheckIntervals[patientId];
+    try {
+        const events = await apiRequest(`/api/events/${encodeURIComponent(selectedPatient)}`);
+        timeline.innerHTML = events.length
+            ? events.slice(-15).reverse().map(event => `
+                <tr>
+                    <td>${formatTimestamp(event.time)}</td>
+                    <td>${escapeHtml(event.event_type || MISSING_VALUE)}</td>
+                    <td>${escapeHtml(event.note || MISSING_VALUE)}</td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="3" class="table-state">No workflow events recorded for this encounter.</td></tr>';
+    } catch (_) {
+        timeline.innerHTML = '<tr><td colspan="3" class="table-state table-state-error">Timeline request failed. <button class="button button-small button-secondary" type="button" onclick="loadPatientEvents()">Retry</button></td></tr>';
     }
 }
 
-async function generateHandoff(patientId = selectedPatient) {
-    if (!patientId) {
-        alert("Select a patient first");
-        return;
-    }
+function openRegistrationDialog() {
+    const dialog = document.getElementById('registrationDialog');
+    setRegistrationMessage('');
+    if (!dialog.open) dialog.showModal();
+    document.getElementById('regPatientId').focus();
+    void refreshAvailableDevices();
+}
 
-    const data = await fetch(`/api/handoff/${patientId}`)
-        .then(r => r.json());
+function closeDialog(dialogId) {
+    const dialog = document.getElementById(dialogId);
+    if (dialog?.open) dialog.close();
+}
 
-    if (!data.ok) {
-        document.getElementById('handoffSummary').innerText =
-            data.error || "Could not generate handoff.";
-        return;
-    }
-
-    document.getElementById('handoffSummary').innerText =
-        data.summary;
+function setRegistrationMessage(message) {
+    const element = document.getElementById('registrationMessage');
+    element.textContent = message;
+    element.hidden = !message;
 }
 
 async function registerPatient() {
     const patientId = document.getElementById('regPatientId').value.trim();
-
     if (!patientId) {
-        alert("Patient ID is required");
+        setRegistrationMessage('Patient ID is required.');
+        document.getElementById('regPatientId').focus();
         return;
     }
+
+    const submit = document.getElementById('registrationSubmit');
+    submit.disabled = true;
+    submit.textContent = 'Registering…';
+    setRegistrationMessage('');
 
     const profile = {
         patient_id: patientId,
@@ -736,30 +763,319 @@ async function registerPatient() {
         chief_complaint: document.getElementById('regComplaint').value.trim(),
         triage_level: document.getElementById('regTriage').value,
         location: document.getElementById('regLocation').value.trim(),
-        assigned_device_id: document.getElementById('regDevice').value.trim(),
+        assigned_device_id: document.getElementById('regDevice').value
     };
 
-    const result = await fetch('/api/register_patient', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(profile)
-    }).then(r => r.json());
+    try {
+        const result = await apiRequest('/api/register_patient', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profile)
+        });
+        document.getElementById('registrationForm').reset();
+        document.getElementById('regTriage').value = 'Unknown';
+        closeDialog('registrationDialog');
+        showToast(`Patient ${patientId} registered for encounter ${result.encounter_id}.`, 'success');
+        await Promise.allSettled([loadPatients(), loadDevices()]);
+    } catch (error) {
+        setRegistrationMessage(error.message);
+        if (error.payload?.field === 'assigned_device_id') {
+            await refreshAvailableDevices();
+            document.getElementById('regDevice').focus();
+        }
+    } finally {
+        submit.disabled = false;
+        submit.textContent = 'Register patient';
+    }
+}
 
-    if (!result.ok) {
-        alert(result.error || "Registration failed");
+function openNoteBox(actionType) {
+    if (!selectedPatient) {
+        showToast('Select a patient first.', 'warning');
         return;
     }
 
-    document.getElementById('regPatientId').value = '';
-    document.getElementById('regName').value = '';
-    document.getElementById('regAge').value = '';
-    document.getElementById('regComplaint').value = '';
-    document.getElementById('regTriage').value = '';
-    document.getElementById('regLocation').value = '';
-    document.getElementById('regDevice').value = '';
+    pendingActionType = actionType;
+    document.getElementById('noteBoxTitle').textContent = actionType;
+    document.getElementById('noteBoxPatient').textContent = selectedPatient;
+    document.getElementById('noteText').value = '';
+    const dialog = document.getElementById('noteBox');
+    if (!dialog.open) dialog.showModal();
+    document.getElementById('noteText').focus();
+}
 
-    loadPatients();
-    loadDevices();
+async function postNote() {
+    if (!selectedPatient || !pendingActionType) return;
+    const submit = document.getElementById('noteSubmit');
+    const completedActionType = pendingActionType;
+    const actionPatientId = selectedPatient;
+    submit.disabled = true;
+    submit.textContent = 'Saving…';
+
+    try {
+        await apiRequest('/api/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                patient_id: actionPatientId,
+                action_type: completedActionType,
+                note: document.getElementById('noteText').value.trim()
+            })
+        });
+        pendingActionType = null;
+        closeDialog('noteBox');
+        showToast(`${completedActionType} recorded for ${actionPatientId}.`, 'success');
+        await Promise.allSettled([loadPatients(), loadDevices(), loadPatientEvents()]);
+
+        if (completedActionType === 'Dismissed to monitoring room') {
+            pendingHandoffPatientId = actionPatientId;
+            const dialog = document.getElementById('handoffChoiceBox');
+            if (!dialog.open) dialog.showModal();
+        }
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        submit.disabled = false;
+        submit.textContent = 'Save action';
+    }
+}
+
+function confirmHandoffYes() {
+    const patientId = pendingHandoffPatientId;
+    pendingHandoffPatientId = null;
+    closeDialog('handoffChoiceBox');
+    void generateHandoff(patientId);
+}
+
+function confirmHandoffNo() {
+    pendingHandoffPatientId = null;
+    closeDialog('handoffChoiceBox');
+}
+
+async function generateHandoff(patientId = selectedPatient) {
+    if (!patientId) {
+        showToast('Select a patient first.', 'warning');
+        return;
+    }
+
+    const summary = document.getElementById('handoffSummary');
+    summary.textContent = 'Generating handoff summary…';
+    try {
+        const data = await apiRequest(`/api/handoff/${encodeURIComponent(patientId)}`);
+        summary.textContent = data.summary;
+        showToast(`Handoff generated for ${patientId}.`, 'success');
+    } catch (error) {
+        summary.textContent = `Handoff request failed: ${error.message}`;
+    }
+}
+
+const ALARM_PATTERNS = {
+    ORANGE: {
+        repeatMs: 3500,
+        tones: [
+            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.00, wave: 'sine' },
+            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.18, wave: 'sine' },
+            { freq: 740, duration: 0.09, volume: 0.07, delay: 0.36, wave: 'sine' }
+        ]
+    },
+    RED: {
+        repeatMs: 1800,
+        tones: [
+            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.00, wave: 'triangle' },
+            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.13, wave: 'triangle' },
+            { freq: 980, duration: 0.08, volume: 0.12, delay: 0.26, wave: 'triangle' },
+            { freq: 760, duration: 0.10, volume: 0.13, delay: 0.42, wave: 'triangle' },
+            { freq: 760, duration: 0.10, volume: 0.13, delay: 0.57, wave: 'triangle' }
+        ]
+    },
+    CRASHING: {
+        repeatMs: 950,
+        tones: [
+            { freq: 1100, duration: 0.07, volume: 0.16, delay: 0.00, wave: 'square' },
+            { freq: 900, duration: 0.07, volume: 0.16, delay: 0.11, wave: 'square' },
+            { freq: 1100, duration: 0.07, volume: 0.16, delay: 0.22, wave: 'square' },
+            { freq: 900, duration: 0.07, volume: 0.16, delay: 0.33, wave: 'square' },
+            { freq: 700, duration: 0.12, volume: 0.18, delay: 0.48, wave: 'square' }
+        ]
+    }
+};
+
+async function enableSound() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        await audioCtx.resume();
+        audioEnabled = true;
+        const button = document.getElementById('soundButton');
+        button.textContent = 'Alert sound enabled';
+        button.disabled = true;
+        showToast('Alert sound enabled for this browser session.', 'success');
+        await loadPatients();
+    } catch (_) {
+        showToast('Alert sound could not be enabled in this browser.', 'error');
+    }
+}
+
+function playTone(frequency, duration, gainValue, startDelay = 0, waveType = 'sine') {
+    if (!audioEnabled || !audioCtx) return;
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    oscillator.type = waveType;
+    oscillator.frequency.value = frequency;
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    const startTime = audioCtx.currentTime + startDelay;
+    const stopTime = startTime + duration;
+    gain.gain.setValueAtTime(gainValue, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, stopTime);
+    oscillator.start(startTime);
+    oscillator.stop(stopTime);
+}
+
+function playBeep(type) {
+    if (!audioEnabled || !audioCtx) return;
+    const pattern = ALARM_PATTERNS[type];
+    if (!pattern) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    pattern.tones.forEach(tone => {
+        playTone(tone.freq, tone.duration, tone.volume, tone.delay, tone.wave);
+    });
+}
+
+function isAlertStatus(status) {
+    return status === 'ORANGE' || status === 'RED' || status === 'CRASHING';
+}
+
+function startAlertLoop(patientId, status) {
+    if (!audioEnabled || !audioCtx || mutedPatients[patientId]) return;
+    if (!ALARM_PATTERNS[status]) return;
+    if (alertIntervals[patientId]?.beepType === status) return;
+    stopAlertLoop(patientId);
+    alertIntervals[patientId] = { beepType: status, timer: null };
+
+    const loop = () => {
+        const current = alertIntervals[patientId];
+        if (!current || mutedPatients[patientId]) {
+            stopAlertLoop(patientId);
+            return;
+        }
+        playBeep(current.beepType);
+        current.timer = window.setTimeout(loop, ALARM_PATTERNS[current.beepType].repeatMs);
+    };
+    loop();
+}
+
+function stopAlertLoop(patientId) {
+    const existing = alertIntervals[patientId];
+    if (!existing) return;
+    if (existing.timer !== null) window.clearTimeout(existing.timer);
+    delete alertIntervals[patientId];
+}
+
+function updatePatientAlertSound(patientId, status) {
+    if (isAlertStatus(status)) startAlertLoop(patientId, status);
+    else stopAlertLoop(patientId);
+}
+
+function mutePatient(patientId) {
+    mutedPatients[patientId] = true;
+    stopAlertLoop(patientId);
+    showToast(`Alert sound muted for ${patientId} until the state returns to GREEN.`, 'warning');
+    void loadPatients();
+}
+
+function startRecheckLoop(patientId) {
+    if (!audioEnabled || !audioCtx || recheckIntervals[patientId]) return;
+    playBeep('ORANGE');
+    recheckIntervals[patientId] = window.setInterval(() => playBeep('ORANGE'), 4000);
+}
+
+function stopRecheckLoop(patientId) {
+    if (!recheckIntervals[patientId]) return;
+    window.clearInterval(recheckIntervals[patientId]);
+    delete recheckIntervals[patientId];
+}
+
+async function refreshDashboard() {
+    if (pollInFlight) return;
+    pollInFlight = true;
+    try {
+        const tasks = [loadPatients(), loadDevices()];
+        if (selectedPatient) tasks.push(loadPatientDetails(), loadPatientEvents());
+        await Promise.allSettled(tasks);
+    } finally {
+        pollInFlight = false;
+    }
+}
+
+function handleTableInteraction(event) {
+    const cleanButton = event.target.closest('[data-clean-device]');
+    if (cleanButton) {
+        void markDeviceClean(cleanButton.dataset.cleanDevice);
+        return;
+    }
+
+    const removeButton = event.target.closest('[data-remove-device]');
+    if (removeButton) {
+        openDeviceRemoval(removeButton.dataset.removeDevice);
+        return;
+    }
+
+    const restoreButton = event.target.closest('[data-restore-device]');
+    if (restoreButton) {
+        void restoreDevice(restoreButton.dataset.restoreDevice);
+        return;
+    }
+
+    const muteButton = event.target.closest('[data-mute-patient]');
+    if (muteButton) {
+        mutePatient(muteButton.dataset.mutePatient);
+        return;
+    }
+
+    const deescalateButton = event.target.closest('[data-deescalate-patient]');
+    if (deescalateButton) {
+        selectedPatient = deescalateButton.dataset.deescalatePatient;
+        openNoteBox('De-escalated / dismissed from priority');
+        return;
+    }
+
+    const row = event.target.closest('tr[data-patient-id]');
+    if (row) selectPatient(row.dataset.patientId);
+}
+
+function initializeDashboard() {
+    document.addEventListener('click', handleTableInteraction);
+    document.addEventListener('keydown', event => {
+        const row = event.target.closest('tr[data-patient-id]');
+        if (row && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            selectPatient(row.dataset.patientId);
+        }
+    });
+
+    document.getElementById('registrationForm').addEventListener('submit', event => {
+        event.preventDefault();
+        void registerPatient();
+    });
+    document.getElementById('noteForm').addEventListener('submit', event => {
+        event.preventDefault();
+        void postNote();
+    });
+    document.getElementById('deviceRemovalForm').addEventListener('submit', event => {
+        event.preventDefault();
+        void removePendingDevice();
+    });
+    document.getElementById('showRetiredDevices').addEventListener('change', () => {
+        void loadDevices();
+    });
+
+    setServerState('loading', 'Connecting');
+    void refreshDashboard();
+    window.setInterval(refreshDashboard, POLL_INTERVAL_MS);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+} else {
+    initializeDashboard();
 }

@@ -1,0 +1,7 @@
+check,expected,actual,pass
+active_encounter,ENC-b9e4a383-192e-41d6-9bb4-3260f03dbff3,ENC-b9e4a383-192e-41d6-9bb4-3260f03dbff3,True
+closed_encounter,ENC-6a79ebad-9a6c-4ec3-87b8-f78d860f1933,ENC-6a79ebad-9a6c-4ec3-87b8-f78d860f1933,True
+priority,True,True,True
+recheck,True,True,True
+retired,True,True,True
+legacy lifecycle migration,True,True,True

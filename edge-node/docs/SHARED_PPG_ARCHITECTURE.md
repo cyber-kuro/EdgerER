@@ -1,6 +1,6 @@
 # Shared Continuous PPG Architecture
 
-EdgeER v1.0 uses one MAX30102 hardware reader and multiple buffer-based signal
+The EdgeER release candidate uses one MAX30102 hardware reader and multiple buffer-based signal
 processors. The design prevents competing code paths from consuming or
 resetting the same hardware FIFO.
 
@@ -68,10 +68,19 @@ RR confidence gating is unchanged:
 - A usable `GOOD` or `MODERATE` result may populate `resp_rate_bpm`.
 - `LOW_CONFIDENCE`, `BAD_SIGNAL`, `BAD_TIMING`, `UNAVAILABLE`, or any unusable
   result sends `resp_rate_bpm` as null.
-- RR does not participate in the Pi risk engine, LEDs, or buzzer.
+- Only a fresh, usable `GOOD` or `MODERATE` result at or above confidence 0.50
+  may enter the local risk engine.
+- An eligible RR outside the configurable 8–30 breaths/min prototype
+  demonstration range may raise `GREEN` to `YELLOW` only.
+- RR cannot create `ORANGE`, `RED`, or `CRASHING`, and cannot reduce or
+  override an existing HR, SpO2, or temperature alert.
+- Withheld, low-quality, missing, or stale RR remains a technical measurement
+  state. No candidate value is used physiologically and no new LED pattern is
+  introduced.
 
-The FastAPI server remains responsible for final workflow status, NEWS2
-availability, alerting, priority, and handoff decisions.
+The FastAPI server remains responsible for encounter status, dashboard
+workflow, priority, reassessment timers, and handoff state. The Pi indication
+is local and provisional.
 
 ## Failure handling
 
@@ -103,6 +112,8 @@ sensor (as used by recording scripts) owns and closes that sensor itself.
   clinically validated pulse-oximetry implementation.
 - PPG-derived RR remains research/prototype output and is not clinically
   authoritative.
+- RR demonstration thresholds are configurable engineering values and are not
+  validated clinical criteria.
 - Optical settings and quality thresholds still require target-hardware and
   subject-condition validation.
 - Motion fields remain null in the live packet, matching the existing node

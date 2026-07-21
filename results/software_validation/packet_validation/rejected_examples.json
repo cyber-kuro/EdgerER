@@ -1,0 +1,538 @@
+[
+  {
+    "case": "missing patient_id",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-6-MISSINGPATIENTID",
+      "device_send_time": "2026-07-21T03:21:52.662079+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": null,
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.662079+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "missing patient_id",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "missing device_id",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": null,
+      "device_send_time": "2026-07-21T03:21:52.675103+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-7-MISSINGDEVICEID",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.675103+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "missing device_id",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "empty patient_id",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-8-EMPTYPATIENTID",
+      "device_send_time": "2026-07-21T03:21:52.687660+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "  ",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.687660+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "missing patient_id",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "empty device_id",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "",
+      "device_send_time": "2026-07-21T03:21:52.700175+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-9-EMPTYDEVICEID",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.700175+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "missing device_id",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "wrong HR type",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-10-WRONGHRTYPE",
+      "device_send_time": "2026-07-21T03:21:52.712811+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": "fast",
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-10-WRONGHRTYPE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.712811+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "heart_rate_bpm must be numeric or null",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "wrong SpO2 type",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-11-WRONGSPO2TYPE",
+      "device_send_time": "2026-07-21T03:21:52.725173+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-11-WRONGSPO2TYPE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": [],
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.725173+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "spo2_percent must be numeric or null",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "wrong RR type",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-12-WRONGRRTYPE",
+      "device_send_time": "2026-07-21T03:21:52.737760+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-12-WRONGRRTYPE",
+      "reasons": [],
+      "resp_rate_bpm": "16",
+      "rr_confidence": 0.8,
+      "rr_quality": "GOOD",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.737760+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "resp_rate_bpm must be numeric or null",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "wrong confidence type",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-13-WRONGCONFIDENCETYP",
+      "device_send_time": "2026-07-21T03:21:52.751828+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-13-WRONGCONFIDENCETYP",
+      "reasons": [],
+      "resp_rate_bpm": 16,
+      "rr_confidence": "high",
+      "rr_quality": "GOOD",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.751828+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "rr_confidence must be numeric or null; numeric resp_rate_bpm requires numeric rr_confidence",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "HR below range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-14-HRBELOWRANGE",
+      "device_send_time": "2026-07-21T03:21:52.765471+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 19,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-14-HRBELOWRANGE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.765471+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "heart_rate_bpm must be between 20 and 250",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "HR above range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-15-HRABOVERANGE",
+      "device_send_time": "2026-07-21T03:21:52.779490+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 251,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-15-HRABOVERANGE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.779490+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "heart_rate_bpm must be between 20 and 250",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "SpO2 below range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-16-SPO2BELOWRANGE",
+      "device_send_time": "2026-07-21T03:21:52.794059+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-16-SPO2BELOWRANGE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 49,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.794059+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "spo2_percent must be between 50 and 100",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "SpO2 above range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-17-SPO2ABOVERANGE",
+      "device_send_time": "2026-07-21T03:21:52.808083+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-17-SPO2ABOVERANGE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 101,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.808083+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "spo2_percent must be between 50 and 100",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "RR below range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-18-RRBELOWRANGE",
+      "device_send_time": "2026-07-21T03:21:52.819808+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-18-RRBELOWRANGE",
+      "reasons": [],
+      "resp_rate_bpm": 3,
+      "rr_confidence": 0.8,
+      "rr_quality": "GOOD",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.819808+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "resp_rate_bpm must be between 4 and 60",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "RR above range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-19-RRABOVERANGE",
+      "device_send_time": "2026-07-21T03:21:52.835227+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-19-RRABOVERANGE",
+      "reasons": [],
+      "resp_rate_bpm": 61,
+      "rr_confidence": 0.8,
+      "rr_quality": "GOOD",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.835227+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "resp_rate_bpm must be between 4 and 60",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "confidence below zero",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-20-CONFIDENCEBELOWZER",
+      "device_send_time": "2026-07-21T03:21:52.848923+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-20-CONFIDENCEBELOWZER",
+      "reasons": [],
+      "rr_confidence": -0.1,
+      "rr_quality": "UNAVAILABLE",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.848923+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "rr_confidence must be between 0 and 1",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "confidence above one",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-21-CONFIDENCEABOVEONE",
+      "device_send_time": "2026-07-21T03:21:52.862978+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-21-CONFIDENCEABOVEONE",
+      "reasons": [],
+      "rr_confidence": 1.1,
+      "rr_quality": "UNAVAILABLE",
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.862978+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "rr_confidence must be between 0 and 1",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "object temperature below range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-22-OBJECTTEMPERATUREB",
+      "device_send_time": "2026-07-21T03:21:52.877546+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 29.9,
+      "packet_sequence": 1,
+      "patient_id": "P-22-OBJECTTEMPERATUREB",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.877546+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "object_temp_c must be between 30 and 45",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "object temperature above range",
+    "packet": {
+      "ambient_temp_c": 24.0,
+      "device_id": "D-23-OBJECTTEMPERATUREA",
+      "device_send_time": "2026-07-21T03:21:52.892099+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 45.1,
+      "packet_sequence": 1,
+      "patient_id": "P-23-OBJECTTEMPERATUREA",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.892099+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "object_temp_c must be between 30 and 45",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "ambient temperature below range",
+    "packet": {
+      "ambient_temp_c": -0.1,
+      "device_id": "D-24-AMBIENTTEMPERATURE",
+      "device_send_time": "2026-07-21T03:21:52.908119+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-24-AMBIENTTEMPERATURE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.908119+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "ambient_temp_c must be between 0 and 60",
+      "ok": false,
+      "received": true
+    }
+  },
+  {
+    "case": "ambient temperature above range",
+    "packet": {
+      "ambient_temp_c": 60.1,
+      "device_id": "D-25-AMBIENTTEMPERATURE",
+      "device_send_time": "2026-07-21T03:21:52.923979+00:00",
+      "device_type": "SIMULATOR",
+      "finger_detected": true,
+      "heart_rate_bpm": 78.0,
+      "object_temp_c": 36.7,
+      "packet_sequence": 1,
+      "patient_id": "P-25-AMBIENTTEMPERATURE",
+      "reasons": [],
+      "signal_quality": "GOOD",
+      "spo2_percent": 98.0,
+      "status": "GREEN",
+      "timestamp": "2026-07-21T03:21:52.923979+00:00"
+    },
+    "response": {
+      "accepted": false,
+      "code": "PACKET_REJECTED",
+      "error": "ambient_temp_c must be between 0 and 60",
+      "ok": false,
+      "received": true
+    }
+  }
+]

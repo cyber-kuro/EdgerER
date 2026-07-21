@@ -1,0 +1,11 @@
+cycle,configured_offline_timeout_seconds,observed_detection_seconds,detection_call_latency_ms,recovery_time_ms,initial_packet_accepted,offline_detected,assignment_preserved,first_accepted_sequence,duplicate_rejected,stale_packet_rejected,active_encounter_count,pass
+1,15,16.106657099991573,6.657099991571158,41.73810000065714,True,True,True,2,True,True,1,True
+2,15,16.107379699964078,7.379699964076281,42.96250001061708,True,True,True,2,True,True,1,True
+3,15,16.106867899966893,6.867899966891855,39.85100000863895,True,True,True,2,True,True,1,True
+4,15,16.105982899980155,5.9828999801538885,39.6403000340797,True,True,True,2,True,True,1,True
+5,15,16.107328299980146,7.328299980144948,43.393900035880506,True,True,True,2,True,True,1,True
+6,15,16.10664480001433,6.6448000143282115,45.9252999862656,True,True,True,2,True,True,1,True
+7,15,16.106354700017256,6.3547000172548,41.571499954443425,True,True,True,2,True,True,1,True
+8,15,16.10682320003398,6.823200033977628,42.40840004058555,True,True,True,2,True,True,1,True
+9,15,16.107031699991786,7.03169999178499,42.38319996511564,True,True,True,2,True,True,1,True
+10,15,16.105590300017504,5.590300017502159,36.52259998489171,True,True,True,2,True,True,1,True

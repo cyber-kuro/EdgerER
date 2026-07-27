@@ -1,0 +1,11 @@
+trial,edgeer_hr,ref_hr,edgeer_spo2,ref_spo2,quality,condition
+HRSP-01,72,73,98,98,GOOD,Seated resting
+HRSP-02,75,74,97,98,GOOD,Seated resting
+HRSP-03,68,70,96,98,GOOD,Seated resting
+HRSP-04,81,80,99,98,GOOD,After light walking
+HRSP-05,77,78,97,96,GOOD,Seated recovery
+HRSP-06,84,82,95,97,FAIR,Minor finger movement
+HRSP-07,71,72,98,99,GOOD,Seated resting
+HRSP-08,79,79,96,96,GOOD,Seated resting
+HRSP-09,88,86,99,97,GOOD,After light walking
+HRSP-10,74,76,97,99,GOOD,Seated recovery

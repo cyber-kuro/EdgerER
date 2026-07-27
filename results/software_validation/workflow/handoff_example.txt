@@ -3,7 +3,7 @@ Patient P-WORKFLOW-1 Handoff Summary
 Investigational engineering prototype. Not intended for patient-care decisions.
 
 Encounter ID:
-ENC-abeeff18-d01a-4c90-9804-07521a1e1b91
+ENC-d14d58d6-fc93-4b6d-97fe-872a94d80c0f
 
 Patient profile:
 Name/code: Synthetic 1
@@ -15,10 +15,10 @@ Assigned device: D-WORKFLOW-1-A (ACTIVE)
 Device type: SIMULATOR
 
 Admission time:
-2026-07-20 22:21:54
+2026-07-21 04:05:21
 
 Dismissal time:
-2026-07-20 22:21:54
+2026-07-21 04:05:21
 
 Current status:
 GREEN
@@ -40,14 +40,14 @@ Heart rate remained stable.
 SpO₂ remained stable.
 
 Recent timeline:
-2026-07-20 22:21:54 — Recheck in 15 min
-2026-07-20 22:21:54 — Doctor notified
-2026-07-20 22:21:54 — Medication given
-2026-07-20 22:21:54 — Seen by nurse
-2026-07-20 22:21:54 — Escalation
-2026-07-20 22:21:54 — De-escalated / dismissed from priority
-2026-07-20 22:21:54 — Escalation
-2026-07-20 22:21:54 — Dismissed to monitoring room
+2026-07-21 04:05:21 — Recheck in 15 min
+2026-07-21 04:05:21 — Doctor notified
+2026-07-21 04:05:21 — Medication given
+2026-07-21 04:05:21 — Seen by nurse
+2026-07-21 04:05:21 — Escalation
+2026-07-21 04:05:21 — De-escalated / dismissed from priority
+2026-07-21 04:05:21 — Escalation
+2026-07-21 04:05:21 — Dismissed to monitoring room
 
 Prototype workflow state:
 GREEN. This prototype provides no diagnosis, treatment, or clinical recommendation.

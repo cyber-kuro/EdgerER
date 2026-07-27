@@ -6,7 +6,7 @@ This software-only engineering validation ran against isolated temporary SQLite 
 
 ## 2. Test environment
 
-- UTC: 2026-07-21T03:20:34.517754+00:00
+- UTC: 2026-07-21T09:04:55.931916+00:00
 - OS: Windows-10-10.0.26200-SP0
 - Python: 3.11.9
 - Logical CPUs: 16
@@ -15,29 +15,29 @@ This software-only engineering validation ran against isolated temporary SQLite 
 
 ## 3. Git commit tested
 
-`3290b7bb9a949d3e1a9f25914cf924916b23cc5b` on branch `main`; dirty working tree: `True`.
+`6c6071068d9117bc6f9438bf6383f6b807aef387` on branch `main`; dirty working tree: `True`.
 
 ## 4. Test groups executed
 
-- **automated_tests**: PASS (23.087 s)
-- **packet_validation**: PASS (2.462 s)
-- **device_lifecycle**: PASS (1.007 s)
-- **workflow**: PASS (1.524 s)
-- **database_persistence**: PASS (0.322 s)
-- **scalability**: PASS (3.327 s)
-- **database_growth**: PASS (3.327 s)
-- **reconnection**: PASS (1.345 s)
-- **api_benchmarks**: PASS (2.094 s)
-- **dashboard**: PASS (0.177 s)
-- **shared_ppg**: PASS (1.282 s)
-- **static_checks**: FAIL (6.238 s)
+- **automated_tests**: PASS (22.562 s)
+- **packet_validation**: PASS (2.232 s)
+- **device_lifecycle**: PASS (0.465 s)
+- **workflow**: PASS (1.436 s)
+- **database_persistence**: PASS (0.310 s)
+- **scalability**: PASS (3.303 s)
+- **database_growth**: PASS (3.303 s)
+- **reconnection**: PASS (1.336 s)
+- **api_benchmarks**: PASS (1.979 s)
+- **dashboard**: PASS (0.175 s)
+- **shared_ppg**: PASS (1.303 s)
+- **static_checks**: FAIL (6.353 s)
 
 ## 5. Automated test totals
 
 ```json
 {
-  "collected": 83,
-  "passed": 83,
+  "collected": 89,
+  "passed": 89,
   "failed": 0,
   "skipped": 0,
   "xfailed": 0

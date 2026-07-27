@@ -14,7 +14,7 @@
     "static_checks"
   ],
   "environment": {
-    "captured_at_utc": "2026-07-21T01:12:55.375749+00:00",
+    "captured_at_utc": "2026-07-21T03:21:44.627808+00:00",
     "database_path_type": "isolated temporary SQLite files",
     "deterministic_seed": 20260720,
     "device_counts": [
@@ -23,39 +23,39 @@
       10,
       20
     ],
-    "duration_seconds_per_scalability_run": 5.0,
+    "duration_seconds_per_scalability_run": 60.0,
     "git_branch": "main",
     "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
     "git_dirty": true,
     "installed_package_versions": {
-      "fastapi": "0.139.2",
+      "fastapi": "0.116.1",
       "httpx": "0.28.1",
-      "matplotlib": "3.11.1",
-      "numpy": "2.5.1",
-      "pandas": null,
+      "matplotlib": "3.10.6",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2",
       "playwright": null,
-      "psutil": null,
+      "psutil": "7.0.0",
       "pytest": null,
-      "scipy": "1.18.0",
+      "scipy": "1.16.2",
       "selenium": null,
-      "starlette": "1.3.1",
-      "uvicorn": "0.51.0"
+      "starlette": "0.47.3",
+      "uvicorn": "0.35.0"
     },
     "logical_cpu_count": 16,
-    "operating_system": "Windows-11-10.0.26200-SP0",
+    "operating_system": "Windows-10-10.0.26200-SP0",
     "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
     "production_database_used": false,
-    "python_version": "3.12.13",
+    "python_version": "3.11.9",
     "selected_test_mode": "full",
-    "sqlite_version": "3.50.4",
+    "sqlite_version": "3.45.1",
     "total_memory_bytes": 33345478656
   },
-  "generated_at_utc": "2026-07-21T01:14:31.935957+00:00",
+  "generated_at_utc": "2026-07-21T03:34:12.803444+00:00",
   "groups": [
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 8.494759499968495,
+      "duration_seconds": 7.0782719000126235,
       "failures": [],
       "name": "automated_tests",
       "status": "PASS",
@@ -65,7 +65,7 @@
           "exit_code": 0,
           "failed": 0,
           "passed": 54,
-          "runtime_seconds": 3.5215718999970704,
+          "runtime_seconds": 2.7801220000255853,
           "skipped": 0,
           "xfailed": 0
         },
@@ -75,7 +75,7 @@
           "exit_code": 0,
           "failed": 0,
           "passed": 29,
-          "runtime_seconds": 4.931104700022843,
+          "runtime_seconds": 4.266054899955634,
           "skipped": 0,
           "xfailed": 0
         },
@@ -91,7 +91,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 3.2019199000205845,
+      "duration_seconds": 2.198058800015133,
       "failures": [],
       "name": "packet_validation",
       "status": "PASS",
@@ -108,7 +108,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 0.494970400002785,
+      "duration_seconds": 0.44374670000979677,
       "failures": [],
       "name": "device_lifecycle",
       "status": "PASS",
@@ -121,7 +121,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.661144300014712,
+      "duration_seconds": 1.489904000016395,
       "failures": [],
       "name": "workflow",
       "status": "PASS",
@@ -134,7 +134,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 0.33675050002057105,
+      "duration_seconds": 0.30988029995933175,
       "failures": [],
       "name": "database_persistence",
       "status": "PASS",
@@ -149,7 +149,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 61.3057712999871,
+      "duration_seconds": 722.209427200025,
       "failures": [],
       "name": "scalability",
       "status": "PASS",
@@ -157,63 +157,63 @@
         "configurations": 4,
         "rows": [
           {
-            "accepted_packets": 344,
-            "attempted_packets": 347,
-            "cpu_average_percent": 2.591873716853284,
-            "database_growth_bytes": 585728,
+            "accepted_packets": 3794,
+            "attempted_packets": 3797,
+            "cpu_average_percent": 1.9270044817538583,
+            "database_growth_bytes": 3141632,
             "device_count": 1,
-            "mean_latency_ms": 44.21126732238656,
-            "memory_peak_bytes": 69545984,
-            "p95_latency_ms": 49.47535998071545,
-            "p99_latency_ms": 70.86003403528595,
+            "mean_latency_ms": 48.51093212157033,
+            "memory_peak_bytes": 87080960,
+            "p95_latency_ms": 235.68880002130754,
+            "p99_latency_ms": 265.8686899841997,
             "request_errors": 0,
             "runs": 3,
-            "throughput_requests_per_second": 22.801529271641897,
+            "throughput_requests_per_second": 21.0457382794316,
             "unexpected_rejections": 0
           },
           {
-            "accepted_packets": 379,
-            "attempted_packets": 382,
-            "cpu_average_percent": 2.420351110686545,
-            "database_growth_bytes": 630784,
+            "accepted_packets": 3841,
+            "attempted_packets": 3844,
+            "cpu_average_percent": 1.9390542686031527,
+            "database_growth_bytes": 4587520,
             "device_count": 5,
-            "mean_latency_ms": 40.022181050470046,
-            "memory_peak_bytes": 72638464,
-            "p95_latency_ms": 53.41537499043625,
-            "p99_latency_ms": 61.75590000930242,
+            "mean_latency_ms": 55.02080346466949,
+            "memory_peak_bytes": 118804480,
+            "p95_latency_ms": 254.76475001778454,
+            "p99_latency_ms": 306.2849700043442,
             "request_errors": 0,
             "runs": 3,
-            "throughput_requests_per_second": 25.113029873359466,
+            "throughput_requests_per_second": 21.33210952794827,
             "unexpected_rejections": 0
           },
           {
-            "accepted_packets": 372,
-            "attempted_packets": 375,
-            "cpu_average_percent": 2.6608573851472834,
-            "database_growth_bytes": 638976,
+            "accepted_packets": 4467,
+            "attempted_packets": 4470,
+            "cpu_average_percent": 2.257835935014061,
+            "database_growth_bytes": 6221824,
             "device_count": 10,
-            "mean_latency_ms": 40.771209739517516,
-            "memory_peak_bytes": 75370496,
-            "p95_latency_ms": 57.4724449776113,
-            "p99_latency_ms": 72.0221040077741,
+            "mean_latency_ms": 40.47481176721042,
+            "memory_peak_bytes": 154726400,
+            "p95_latency_ms": 54.07439998816699,
+            "p99_latency_ms": 254.73244000459084,
             "request_errors": 0,
             "runs": 3,
-            "throughput_requests_per_second": 24.558494674397892,
+            "throughput_requests_per_second": 24.77583177692351,
             "unexpected_rejections": 0
           },
           {
-            "accepted_packets": 358,
-            "attempted_packets": 361,
-            "cpu_average_percent": 2.4454979520189593,
-            "database_growth_bytes": 675840,
+            "accepted_packets": 4103,
+            "attempted_packets": 4106,
+            "cpu_average_percent": 2.0487974253599055,
+            "database_growth_bytes": 5783552,
             "device_count": 20,
-            "mean_latency_ms": 42.305439971508186,
-            "memory_peak_bytes": 77893632,
-            "p95_latency_ms": 59.056019969284534,
-            "p99_latency_ms": 69.67160797910769,
+            "mean_latency_ms": 46.760569052165884,
+            "memory_peak_bytes": 187801600,
+            "p95_latency_ms": 248.49094996170606,
+            "p99_latency_ms": 364.0309500042349,
             "request_errors": 0,
             "runs": 3,
-            "throughput_requests_per_second": 23.786099961238104,
+            "throughput_requests_per_second": 22.783020582772462,
             "unexpected_rejections": 0
           }
         ],
@@ -224,20 +224,20 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 61.3057712999871,
+      "duration_seconds": 722.209427200025,
       "failures": [],
       "name": "database_growth",
       "status": "PASS",
       "summary": {
         "integrity_failures": 0,
         "runs": 12,
-        "total_bytes_added": 2531328
+        "total_bytes_added": 19734528
       }
     },
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.263269199989736,
+      "duration_seconds": 1.2303950999630615,
       "failures": [],
       "name": "reconnection",
       "status": "PASS",
@@ -245,16 +245,16 @@
         "configured_offline_timeout_seconds": 15,
         "cycles": 10,
         "failed": 0,
-        "mean_detection_seconds": 16.106117840012303,
-        "mean_recovery_ms": 39.147070015314966,
-        "p95_recovery_ms": 40.57774500979576,
+        "mean_detection_seconds": 16.105786999996052,
+        "mean_recovery_ms": 36.898679996374995,
+        "p95_recovery_ms": 38.66539500595536,
         "passed": 10
       }
     },
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 6.465140399988741,
+      "duration_seconds": 5.3532054999959655,
       "failures": [],
       "name": "api_benchmarks",
       "status": "PASS",
@@ -265,113 +265,113 @@
           {
             "endpoint": "/api/devices",
             "failure_count": 0,
-            "max_ms": 3.630499995779246,
-            "mean_ms": 2.9351079991708198,
-            "median_ms": 2.8972000000067055,
+            "max_ms": 3.0583000043407083,
+            "mean_ms": 2.2897626692429185,
+            "median_ms": 2.2149999858811498,
             "method": "GET",
-            "min_ms": 2.444900048431009,
-            "p95_ms": 3.456289996393025,
-            "p99_ms": 3.5428099741693595,
+            "min_ms": 2.1043000160716474,
+            "p95_ms": 2.725229988573119,
+            "p99_ms": 2.869747990043835,
             "request_count": 75,
-            "requests_per_second": 340.7029657111439,
+            "requests_per_second": 436.72648411664323,
             "success_count": 75
           },
           {
             "endpoint": "/api/patients",
             "failure_count": 0,
-            "max_ms": 2.053899981547147,
-            "mean_ms": 1.4173226648320754,
-            "median_ms": 1.4412999735213816,
+            "max_ms": 1.3158000074326992,
+            "mean_ms": 1.0790386664060254,
+            "median_ms": 1.0712000075727701,
             "method": "GET",
-            "min_ms": 1.0358999716117978,
-            "p95_ms": 1.6244399710558355,
-            "p99_ms": 1.794381986837836,
+            "min_ms": 0.9970000246539712,
+            "p95_ms": 1.1934900074265897,
+            "p99_ms": 1.2721400195732715,
             "request_count": 75,
-            "requests_per_second": 705.5556400902402,
+            "requests_per_second": 926.7508488187166,
             "success_count": 75
           },
           {
             "endpoint": "/api/history",
             "failure_count": 0,
-            "max_ms": 1.664399984292686,
-            "mean_ms": 1.1631346680223942,
-            "median_ms": 1.1808000272139907,
+            "max_ms": 1.0797000140883029,
+            "mean_ms": 0.8620506656977037,
+            "median_ms": 0.8471000473946333,
             "method": "GET",
-            "min_ms": 0.8452000329270959,
-            "p95_ms": 1.4058000466320664,
-            "p99_ms": 1.627104001818225,
+            "min_ms": 0.7688999758102,
+            "p95_ms": 1.005040027666837,
+            "p99_ms": 1.0732620081398636,
             "request_count": 75,
-            "requests_per_second": 859.7456747637297,
+            "requests_per_second": 1160.024624759899,
             "success_count": 75
           },
           {
             "endpoint": "/api/packet_logs?limit=50",
             "failure_count": 0,
-            "max_ms": 3.8802000344730914,
-            "mean_ms": 2.782354662194848,
-            "median_ms": 2.6587999891489744,
+            "max_ms": 2.8641000390052795,
+            "mean_ms": 2.332313331620147,
+            "median_ms": 2.2369000362232327,
             "method": "GET",
-            "min_ms": 2.28020001668483,
-            "p95_ms": 3.568869980517775,
-            "p99_ms": 3.8122680340893567,
+            "min_ms": 2.0850999862886965,
+            "p95_ms": 2.752059989143163,
+            "p99_ms": 2.8475239989347756,
             "request_count": 75,
-            "requests_per_second": 359.40781151571616,
+            "requests_per_second": 428.7588577583389,
             "success_count": 75
           },
           {
             "endpoint": "/api/encounters/P-API-0",
             "failure_count": 0,
-            "max_ms": 2.6723999762907624,
-            "mean_ms": 2.210644002382954,
-            "median_ms": 2.1628999966196716,
+            "max_ms": 2.4883999722078443,
+            "mean_ms": 1.9808213327390451,
+            "median_ms": 1.9125000108033419,
             "method": "GET",
-            "min_ms": 1.9573000026866794,
-            "p95_ms": 2.531899994937703,
-            "p99_ms": 2.650792027125135,
+            "min_ms": 1.7161000287160277,
+            "p95_ms": 2.3340100015047938,
+            "p99_ms": 2.4465899984352295,
             "request_count": 75,
-            "requests_per_second": 452.3568692752222,
+            "requests_per_second": 504.8410896389214,
             "success_count": 75
           },
           {
             "endpoint": "/api/handoff/P-API-0",
             "failure_count": 0,
-            "max_ms": 2.854800026398152,
-            "mean_ms": 2.274500001221895,
-            "median_ms": 2.2129000280983746,
+            "max_ms": 2.645100001245737,
+            "mean_ms": 2.15967599923412,
+            "median_ms": 2.1421000128611922,
             "method": "GET",
-            "min_ms": 2.0330999977886677,
-            "p95_ms": 2.694019995396957,
-            "p99_ms": 2.7867939823772763,
+            "min_ms": 1.8446999602019787,
+            "p95_ms": 2.471719979075715,
+            "p99_ms": 2.5785740115679805,
             "request_count": 75,
-            "requests_per_second": 439.65706725116956,
+            "requests_per_second": 463.0324179898407,
             "success_count": 75
           },
           {
             "endpoint": "/api/vitals",
             "failure_count": 0,
-            "max_ms": 50.26510002790019,
-            "mean_ms": 44.27038000198081,
-            "median_ms": 44.198399991728365,
+            "max_ms": 44.26730005070567,
+            "mean_ms": 37.43383066573491,
+            "median_ms": 36.93330002715811,
             "method": "POST",
-            "min_ms": 37.109099968802184,
-            "p95_ms": 47.48929000925273,
-            "p99_ms": 48.43108401866631,
+            "min_ms": 35.55460000643507,
+            "p95_ms": 40.34091998473741,
+            "p99_ms": 43.27866001753137,
             "request_count": 75,
-            "requests_per_second": 22.588466599004946,
+            "requests_per_second": 26.713803589311816,
             "success_count": 75
           },
           {
             "endpoint": "/api/action",
             "failure_count": 0,
-            "max_ms": 52.17119998997077,
-            "mean_ms": 19.2326319986023,
-            "median_ms": 18.635999993421137,
+            "max_ms": 18.249400018248707,
+            "mean_ms": 14.962902667466551,
+            "median_ms": 14.685000001918525,
             "method": "POST",
-            "min_ms": 16.849200008437037,
-            "p95_ms": 20.37994002457708,
-            "p99_ms": 30.942301998147887,
+            "min_ms": 14.109999989159405,
+            "p95_ms": 16.44098000251688,
+            "p99_ms": 17.34356601256878,
             "request_count": 75,
-            "requests_per_second": 51.99496356362838,
+            "requests_per_second": 66.83195247766156,
             "success_count": 75
           }
         ]
@@ -380,7 +380,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 0.19380259996978566,
+      "duration_seconds": 0.15614600002299994,
       "failures": [],
       "name": "dashboard",
       "status": "PASS",
@@ -396,7 +396,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.7369807999930345,
+      "duration_seconds": 1.105973300000187,
       "failures": [],
       "name": "shared_ppg",
       "status": "PASS",
@@ -404,13 +404,13 @@
         "assertions": 20,
         "assertions_passed": 20,
         "test_exit_code": 0,
-        "test_runtime_seconds": 1.7330271999817342
+        "test_runtime_seconds": 1.102864199958276
       }
     },
     {
       "blocked": [],
       "critical": true,
-      "duration_seconds": 8.570845799986273,
+      "duration_seconds": 5.227972999971826,
       "failures": [
         "tracked_database: server/edgeer.db"
       ],
@@ -428,474 +428,6 @@
             "file": "server/edgeer.db",
             "line": null,
             "severity": "CRITICAL"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/__pycache__/config.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/__pycache__/config.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/__pycache__/main.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/__pycache__/main.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/acquisition/__pycache__/__init__.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/acquisition/__pycache__/__init__.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/acquisition/__pycache__/ppg_stream.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/acquisition/__pycache__/ppg_stream.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/buzzer.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/buzzer.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/leds.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/leds.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/local_alerts.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/local_alerts.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/alerts/__pycache__/local_alerts.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/backend/__pycache__/config.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/backend/__pycache__/config.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/backend/__pycache__/sender.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/backend/__pycache__/sender.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/__init__.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/__init__.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/hr_spo2.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/ppg_pipeline.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/ppg_quality.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/ppg_quality.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/respiratory_rate.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/processing/__pycache__/respiratory_rate.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/__init__.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/__init__.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/analyze_ppg_csv.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/analyze_ppg_csv.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/estimate_rr_from_ppg_csv.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/estimate_rr_from_ppg_csv.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/record_ppg_csv.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/record_ppg_csv.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/rr_validation_session.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/rr_validation_session.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/test_live_rr_packet.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/test_live_rr_packet.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/validate_rr_recordings.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/scripts/__pycache__/validate_rr_recordings.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/max30102.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/max30102.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/max30102.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mlx90614.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mlx90614.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mlx90614.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mpu6050.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mpu6050_sensor.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mpu6050_sensor.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/sensors/__pycache__/mpu6050_sensor.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_hr_spo2.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_live_rr_packet.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_live_rr_packet.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_main_rr_integration.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_main_rr_integration.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_ppg_buffer.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_ppg_buffer.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_ppg_pipeline.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_ppg_quality.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_ppg_quality.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_respiratory_rate.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_respiratory_rate.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_rr_validation.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_rr_validation.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_rr_validation_session.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_rr_validation_session.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/tests/__pycache__/test_script_imports.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/utils/__pycache__/filters.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/utils/__pycache__/filters.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/utils/__pycache__/risk_engine.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/utils/__pycache__/risk_engine.cpython-312.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "edge-node/utils/__pycache__/risk_engine.cpython-313.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "server/__pycache__/database.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "server/__pycache__/models.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "server/__pycache__/packet_validation.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "server/__pycache__/services.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
-          },
-          {
-            "category": "tracked_generated_bytecode",
-            "file": "server/__pycache__/state.cpython-311.pyc",
-            "line": null,
-            "severity": "WARNING"
           },
           {
             "category": "personal_path",
@@ -959,6 +491,66 @@
           },
           {
             "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 1,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 2,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 40,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 41,
+            "severity": "WARNING"
+          },
+          {
+            "category": "local_ip",
+            "file": "results\\software_validation\\dashboard\\in_app_browser_validation.json",
+            "line": 4,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 76,
+            "severity": "INFO"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 93,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 96,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\import_checks.txt",
+            "line": 1,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\import_checks.txt",
+            "line": 5,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
             "file": "server\\research\\rr_ppg\\README.md",
             "line": 68,
             "severity": "WARNING"
@@ -971,8 +563,8 @@
           }
         ],
         "tracked_databases": 1,
-        "tracked_files": 139,
-        "tracked_pyc_files": 78,
+        "tracked_files": 150,
+        "tracked_pyc_files": 0,
         "tracked_venv_files": 0
       }
     }

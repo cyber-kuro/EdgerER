@@ -1,46 +1,46 @@
 test_id,case_name,category,expected_acceptance,actual_acceptance,expected_http_status,actual_http_status,expected_reason_contains,actual_reason,packet_logged,pass,duration_ms
-PV-001,valid packet,valid,True,True,200,200,,,True,True,60.85700000403449
-PV-002,valid GOOD RR,rr,True,True,200,200,,,True,True,67.35919998027384
-PV-003,valid MODERATE RR,rr,True,True,200,200,,,True,True,60.09380001341924
-PV-004,null RR LOW_CONFIDENCE,rr,True,True,200,200,,,True,True,58.69699997128919
-PV-005,null RR UNAVAILABLE,rr,True,True,200,200,,,True,True,60.69670000579208
-PV-006,missing patient_id,invalid value,False,False,400,400,missing patient_id,missing patient_id,True,True,6.388899986632168
-PV-007,missing device_id,invalid value,False,False,400,400,missing device_id,missing device_id,True,True,6.801599985919893
-PV-008,empty patient_id,invalid value,False,False,400,400,missing patient_id,missing patient_id,True,True,6.444699945859611
-PV-009,empty device_id,invalid value,False,False,400,400,missing device_id,missing device_id,True,True,6.49980001617223
-PV-010,wrong HR type,invalid value,False,False,400,400,must be numeric,heart_rate_bpm must be numeric or null,True,True,6.140499957837164
-PV-011,wrong SpO2 type,invalid value,False,False,400,400,must be numeric,spo2_percent must be numeric or null,True,True,6.439500022679567
-PV-012,wrong RR type,invalid value,False,False,400,400,must be numeric,resp_rate_bpm must be numeric or null,True,True,6.90279999980703
-PV-013,wrong confidence type,invalid value,False,False,400,400,must be numeric,rr_confidence must be numeric or null; numeric resp_rate_bpm requires numeric rr_confidence,True,True,6.386000022757798
-PV-014,HR below range,invalid value,False,False,400,400,between 20 and 250,heart_rate_bpm must be between 20 and 250,True,True,6.868899974506348
-PV-015,HR above range,invalid value,False,False,400,400,between 20 and 250,heart_rate_bpm must be between 20 and 250,True,True,6.6639999859035015
-PV-016,SpO2 below range,invalid value,False,False,400,400,between 50 and 100,spo2_percent must be between 50 and 100,True,True,6.707299966365099
-PV-017,SpO2 above range,invalid value,False,False,400,400,between 50 and 100,spo2_percent must be between 50 and 100,True,True,6.460300006438047
-PV-018,RR below range,invalid value,False,False,400,400,between 4 and 60,resp_rate_bpm must be between 4 and 60,True,True,6.891900033224374
-PV-019,RR above range,invalid value,False,False,400,400,between 4 and 60,resp_rate_bpm must be between 4 and 60,True,True,6.791200023144484
-PV-020,confidence below zero,invalid value,False,False,400,400,between 0 and 1,rr_confidence must be between 0 and 1,True,True,6.450199987739325
-PV-021,confidence above one,invalid value,False,False,400,400,between 0 and 1,rr_confidence must be between 0 and 1,True,True,7.036000024527311
-PV-022,object temperature below range,invalid value,False,False,400,400,between 30 and 45,object_temp_c must be between 30 and 45,True,True,6.33240002207458
-PV-023,object temperature above range,invalid value,False,False,400,400,between 30 and 45,object_temp_c must be between 30 and 45,True,True,7.144499977584928
-PV-024,ambient temperature below range,invalid value,False,False,400,400,between 0 and 60,ambient_temp_c must be between 0 and 60,True,True,6.656100042164326
-PV-025,ambient temperature above range,invalid value,False,False,400,400,between 0 and 60,ambient_temp_c must be between 0 and 60,True,True,6.632499978877604
-PV-026,stale timestamp,freshness,False,False,400,400,stale,device_send_time is stale (older than 300 seconds),True,True,6.10719999531284
-PV-027,future timestamp,freshness,False,False,400,400,future,device_send_time is too far in the future (more than 60 seconds),True,True,7.161000045016408
-PV-028,duplicate setup,identity,True,True,200,200,,,True,True,79.81109997490421
-PV-029,duplicate packet identifier,identity,False,False,409,409,duplicate,duplicate packet identity for device D-DUP: sequence 7 at 2026-07-21T03:21:52.967236+00:00,True,True,6.978599994909018
-PV-030,duplicate sequence with new timestamp,identity,True,True,200,200,,,True,True,39.751899952534586
-PV-031,out-of-order sequence,identity,True,True,200,200,,,True,True,38.208600017242134
-PV-032,unknown device auto-registration,device,True,True,200,200,,,True,True,57.73350002709776
-PV-033,retired device,device,False,False,409,409,retired,Device D-RETIRED-MATRIX is retired.,True,True,6.440300028771162
-PV-034,device in SENSOR_FAULT,device,False,False,409,409,SENSOR_FAULT,device assignment error: device D-FAULT-MATRIX is in SENSOR_FAULT,True,True,13.164800009690225
-PV-035,wrong device-to-patient assignment,assignment,False,False,409,409,assigned,device assignment error: device D-OWNER is assigned to active patient P-OWNER encounter ENC-e4dc58b3-107c-4a06-a39c-a054ef85f544,True,True,12.850700004491955
-PV-036,device assigned to another active encounter,assignment,False,False,409,409,assigned,device assignment error: device D-OWNER is assigned to active patient P-OWNER encounter ENC-e4dc58b3-107c-4a06-a39c-a054ef85f544,True,True,14.678100007586181
-PV-037,packet for dismissed encounter,encounter,False,False,409,409,dismissed,patient P-OWNER has been dismissed; explicit readmission is required before packets can be accepted,True,True,13.38039996335283
-PV-038,packet for inactive encounter,encounter,False,False,409,409,readmission,patient P-OWNER has been dismissed; explicit readmission is required before packets can be accepted,True,True,12.761700025293976
-PV-039,packet after valid reassignment,assignment,True,True,200,200,,,True,True,53.817100008018315
-PV-040,packet after reconnection,reconnection,True,True,200,200,,,True,True,45.265100023243576
-PV-041,extra unknown fields,compatibility,True,True,200,200,,,True,True,61.23619998106733
-PV-042,missing optional fields,compatibility,True,True,200,200,,,True,True,66.73880002927035
-PV-043,null optional fields,compatibility,True,True,200,200,,,True,True,58.488600014243275
-PV-044,NaN value,parser,False,False,400,400,finite,heart_rate_bpm must be finite,True,True,7.130299985874444
-PV-045,large payload with malformed nested field,parser,False,False,400,400,list of strings,reasons must be a list of strings or null,True,True,7.267100038006902
+PV-001,valid packet,valid,True,True,200,200,,,True,True,57.17919999733567
+PV-002,valid GOOD RR,rr,True,True,200,200,,,True,True,55.337099998723716
+PV-003,valid MODERATE RR,rr,True,True,200,200,,,True,True,56.06049997732043
+PV-004,null RR LOW_CONFIDENCE,rr,True,True,200,200,,,True,True,58.39750001905486
+PV-005,null RR UNAVAILABLE,rr,True,True,200,200,,,True,True,59.586199990008026
+PV-006,missing patient_id,invalid value,False,False,400,400,missing patient_id,missing patient_id,True,True,5.974099971354008
+PV-007,missing device_id,invalid value,False,False,400,400,missing device_id,missing device_id,True,True,6.324300018604845
+PV-008,empty patient_id,invalid value,False,False,400,400,missing patient_id,missing patient_id,True,True,6.579099979717284
+PV-009,empty device_id,invalid value,False,False,400,400,missing device_id,missing device_id,True,True,6.823599978815764
+PV-010,wrong HR type,invalid value,False,False,400,400,must be numeric,heart_rate_bpm must be numeric or null,True,True,6.355499965138733
+PV-011,wrong SpO2 type,invalid value,False,False,400,400,must be numeric,spo2_percent must be numeric or null,True,True,5.611100001260638
+PV-012,wrong RR type,invalid value,False,False,400,400,must be numeric,resp_rate_bpm must be numeric or null,True,True,6.0329000116325915
+PV-013,wrong confidence type,invalid value,False,False,400,400,must be numeric,rr_confidence must be numeric or null; numeric resp_rate_bpm requires numeric rr_confidence,True,True,5.924500001128763
+PV-014,HR below range,invalid value,False,False,400,400,between 20 and 250,heart_rate_bpm must be between 20 and 250,True,True,5.76339999679476
+PV-015,HR above range,invalid value,False,False,400,400,between 20 and 250,heart_rate_bpm must be between 20 and 250,True,True,5.7011000462807715
+PV-016,SpO2 below range,invalid value,False,False,400,400,between 50 and 100,spo2_percent must be between 50 and 100,True,True,5.580800003372133
+PV-017,SpO2 above range,invalid value,False,False,400,400,between 50 and 100,spo2_percent must be between 50 and 100,True,True,5.531999981030822
+PV-018,RR below range,invalid value,False,False,400,400,between 4 and 60,resp_rate_bpm must be between 4 and 60,True,True,5.876399984117597
+PV-019,RR above range,invalid value,False,False,400,400,between 4 and 60,resp_rate_bpm must be between 4 and 60,True,True,5.976599990390241
+PV-020,confidence below zero,invalid value,False,False,400,400,between 0 and 1,rr_confidence must be between 0 and 1,True,True,5.8392000501044095
+PV-021,confidence above one,invalid value,False,False,400,400,between 0 and 1,rr_confidence must be between 0 and 1,True,True,6.603399990126491
+PV-022,object temperature below range,invalid value,False,False,400,400,between 30 and 45,object_temp_c must be between 30 and 45,True,True,6.160799995996058
+PV-023,object temperature above range,invalid value,False,False,400,400,between 30 and 45,object_temp_c must be between 30 and 45,True,True,6.029799988027662
+PV-024,ambient temperature below range,invalid value,False,False,400,400,between 0 and 60,ambient_temp_c must be between 0 and 60,True,True,5.769199982751161
+PV-025,ambient temperature above range,invalid value,False,False,400,400,between 0 and 60,ambient_temp_c must be between 0 and 60,True,True,6.549699988681823
+PV-026,stale timestamp,freshness,False,False,400,400,stale,device_send_time is stale (older than 300 seconds),True,True,6.478399969637394
+PV-027,future timestamp,freshness,False,False,400,400,future,device_send_time is too far in the future (more than 60 seconds),True,True,6.503500044345856
+PV-028,duplicate setup,identity,True,True,200,200,,,True,True,59.77980000898242
+PV-029,duplicate packet identifier,identity,False,False,409,409,duplicate,duplicate packet identity for device D-DUP: sequence 7 at 2026-07-21T09:05:19.888832+00:00,True,True,8.309500000905246
+PV-030,duplicate sequence with new timestamp,identity,True,True,200,200,,,True,True,42.6729999599047
+PV-031,out-of-order sequence,identity,True,True,200,200,,,True,True,41.49880004115403
+PV-032,unknown device auto-registration,device,True,True,200,200,,,True,True,64.20209998032078
+PV-033,retired device,device,False,False,409,409,retired,Device D-RETIRED-MATRIX is retired.,True,True,7.019899960141629
+PV-034,device in SENSOR_FAULT,device,False,False,409,409,SENSOR_FAULT,device assignment error: device D-FAULT-MATRIX is in SENSOR_FAULT,True,True,14.331699989270419
+PV-035,wrong device-to-patient assignment,assignment,False,False,409,409,assigned,device assignment error: device D-OWNER is assigned to active patient P-OWNER encounter ENC-38bab373-b762-45aa-8881-b5ae61995d6f,True,True,13.02030001534149
+PV-036,device assigned to another active encounter,assignment,False,False,409,409,assigned,device assignment error: device D-OWNER is assigned to active patient P-OWNER encounter ENC-38bab373-b762-45aa-8881-b5ae61995d6f,True,True,14.217799995094538
+PV-037,packet for dismissed encounter,encounter,False,False,409,409,dismissed,patient P-OWNER has been dismissed; explicit readmission is required before packets can be accepted,True,True,13.840099971275777
+PV-038,packet for inactive encounter,encounter,False,False,409,409,readmission,patient P-OWNER has been dismissed; explicit readmission is required before packets can be accepted,True,True,14.336899970658123
+PV-039,packet after valid reassignment,assignment,True,True,200,200,,,True,True,54.119400039780885
+PV-040,packet after reconnection,reconnection,True,True,200,200,,,True,True,39.411600038874894
+PV-041,extra unknown fields,compatibility,True,True,200,200,,,True,True,65.68579998565838
+PV-042,missing optional fields,compatibility,True,True,200,200,,,True,True,57.824899966362864
+PV-043,null optional fields,compatibility,True,True,200,200,,,True,True,53.75269998330623
+PV-044,NaN value,parser,False,False,400,400,finite,heart_rate_bpm must be finite,True,True,5.877100047655404
+PV-045,large payload with malformed nested field,parser,False,False,400,400,list of strings,reasons must be a list of strings or null,True,True,6.842300004791468

@@ -373,7 +373,9 @@ function deviceTypeLabel(value) {
 }
 
 function deviceRowHtml(device) {
-    const isRetired = !device.is_active;
+    // Treat only an explicit inactive lifecycle value as retired. Older server
+    // responses may omit is_active; absence must never retire an active node.
+    const isRetired = device.is_active === false || device.lifecycle_state === 'RETIRED';
     const assigned = device.assigned_patient_id
         ? `<span class="cell-primary">${escapeHtml(device.assigned_patient_id)}</span>`
         : `<span class="cell-secondary">${isRetired ? 'Historical only' : 'Available'}</span>`;
@@ -422,7 +424,11 @@ function updateDeviceSelect(devices, { preserveSelection = true } = {}) {
     if (!select || !state) return;
 
     const previous = preserveSelection ? select.value : '';
-    const available = devices.filter(device => device.assignable);
+    const available = devices.filter(device =>
+        device.is_active !== false
+        && device.lifecycle_state !== 'RETIRED'
+        && device.assignable
+    );
     const previousStillValid = available.some(device => device.device_id === previous);
 
     const options = ['<option value="">Register without a device</option>'];
@@ -457,7 +463,18 @@ async function loadDevices({ announce = false } = {}) {
     if (refreshButton) refreshButton.disabled = true;
 
     try {
-        const devices = await apiRequest(`/api/devices?include_retired=${includeRetired}`);
+        const endpoint = includeRetired
+            ? '/api/devices?include_retired=true'
+            : '/api/devices';
+        const responseDevices = await apiRequest(endpoint);
+        // The backend is authoritative, but filtering again prevents stale
+        // retired rows during a mixed-version rollout or cached response.
+        const devices = includeRetired
+            ? responseDevices
+            : responseDevices.filter(device =>
+                device.is_active !== false
+                && device.lifecycle_state !== 'RETIRED'
+            );
         lastDevices = devices;
         table.innerHTML = devices.length
             ? devices.map(deviceRowHtml).join('')

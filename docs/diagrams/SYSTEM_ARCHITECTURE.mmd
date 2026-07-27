@@ -1,0 +1,15 @@
+flowchart LR
+    A[MAX30102 PPG] --> B[Continuous PPGStream]
+    B --> C[Shared timestamped RED/IR buffer]
+    C --> D[HR and SpO2]
+    C --> E[PPG quality]
+    C --> F[Experimental RR]
+    G[MLX90614] --> H[Raspberry Pi node]
+    D --> H
+    E --> H
+    F --> H
+    H --> I[Validated packet]
+    I --> J[FastAPI server]
+    J --> K[SQLite]
+    J --> L[Dashboard and workflow]
+    M[Simulator] --> J

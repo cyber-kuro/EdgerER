@@ -4,7 +4,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
-# Virtual environments
+# Environments
 .venv/
 venv/
 env/
@@ -16,15 +16,19 @@ env/
 *.sqlite
 *.sqlite3
 
-# Secrets and local configuration
+# Local configuration
 .env
 .env.*
 secrets.json
+config.local.py
 
-# Runtime logs
+# Generated logs and measurements
+edge-node/logs/
+edge-node/plots/
+results/raw/
 *.log
 
-# Editors and operating systems
+# Editors and OS
 .vscode/
 .idea/
 .DS_Store

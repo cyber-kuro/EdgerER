@@ -4,9 +4,9 @@
     "static_checks: tracked_database: server/edgeer.db"
   ],
   "automated_test_totals": {
-    "collected": 83,
+    "collected": 89,
     "failed": 0,
-    "passed": 83,
+    "passed": 89,
     "skipped": 0,
     "xfailed": 0
   },
@@ -14,7 +14,7 @@
     "static_checks"
   ],
   "environment": {
-    "captured_at_utc": "2026-07-21T03:20:34.517754+00:00",
+    "captured_at_utc": "2026-07-21T09:04:55.931916+00:00",
     "database_path_type": "isolated temporary SQLite files",
     "deterministic_seed": 20260720,
     "device_counts": [
@@ -24,7 +24,7 @@
     ],
     "duration_seconds_per_scalability_run": 1.0,
     "git_branch": "main",
-    "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+    "git_commit": "6c6071068d9117bc6f9438bf6383f6b807aef387",
     "git_dirty": true,
     "installed_package_versions": {
       "fastapi": "0.116.1",
@@ -49,12 +49,12 @@
     "sqlite_version": "3.45.1",
     "total_memory_bytes": 33345478656
   },
-  "generated_at_utc": "2026-07-21T03:21:20.366675+00:00",
+  "generated_at_utc": "2026-07-21T09:05:41.985064+00:00",
   "groups": [
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 23.086545499973,
+      "duration_seconds": 22.562332000001334,
       "failures": [],
       "name": "automated_tests",
       "status": "PASS",
@@ -64,24 +64,24 @@
           "exit_code": 0,
           "failed": 0,
           "passed": 54,
-          "runtime_seconds": 13.804793800052721,
+          "runtime_seconds": 12.84365950000938,
           "skipped": 0,
           "xfailed": 0
         },
-        "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+        "git_commit": "6c6071068d9117bc6f9438bf6383f6b807aef387",
         "server": {
-          "collected": 29,
+          "collected": 35,
           "exit_code": 0,
           "failed": 0,
-          "passed": 29,
-          "runtime_seconds": 9.250764399999753,
+          "passed": 35,
+          "runtime_seconds": 9.653841499995906,
           "skipped": 0,
           "xfailed": 0
         },
         "totals": {
-          "collected": 83,
+          "collected": 89,
           "failed": 0,
-          "passed": 83,
+          "passed": 89,
           "skipped": 0,
           "xfailed": 0
         }
@@ -90,7 +90,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 2.461816800001543,
+      "duration_seconds": 2.2320703000295907,
       "failures": [],
       "name": "packet_validation",
       "status": "PASS",
@@ -107,7 +107,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.007361399999354,
+      "duration_seconds": 0.46480309998150915,
       "failures": [],
       "name": "device_lifecycle",
       "status": "PASS",
@@ -120,7 +120,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.5239831000217237,
+      "duration_seconds": 1.4359194000135176,
       "failures": [],
       "name": "workflow",
       "status": "PASS",
@@ -133,7 +133,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 0.3219730999553576,
+      "duration_seconds": 0.30969520000508055,
       "failures": [],
       "name": "database_persistence",
       "status": "PASS",
@@ -148,7 +148,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 3.327225200016983,
+      "duration_seconds": 3.303048600035254,
       "failures": [],
       "name": "scalability",
       "status": "PASS",
@@ -156,48 +156,48 @@
         "configurations": 3,
         "rows": [
           {
-            "accepted_packets": 24,
-            "attempted_packets": 25,
-            "cpu_average_percent": 2.4056422149655403,
+            "accepted_packets": 26,
+            "attempted_packets": 27,
+            "cpu_average_percent": 2.754952696727704,
             "database_growth_bytes": 65536,
             "device_count": 1,
-            "mean_latency_ms": 43.80349565358104,
-            "memory_peak_bytes": 58912768,
-            "p95_latency_ms": 48.503539996454485,
-            "p99_latency_ms": 59.060547993285596,
+            "mean_latency_ms": 40.50243599805981,
+            "memory_peak_bytes": 57999360,
+            "p95_latency_ms": 44.727639970369644,
+            "p99_latency_ms": 52.22039999440314,
             "request_errors": 0,
             "runs": 1,
-            "throughput_requests_per_second": 23.68632334735301,
+            "throughput_requests_per_second": 25.389644053042517,
             "unexpected_rejections": 0
           },
           {
             "accepted_packets": 24,
             "attempted_packets": 25,
-            "cpu_average_percent": 2.3168414900254297,
+            "cpu_average_percent": 2.345421455536713,
             "database_growth_bytes": 65536,
             "device_count": 5,
-            "mean_latency_ms": 45.27438261657549,
-            "memory_peak_bytes": 58306560,
-            "p95_latency_ms": 56.65460996096954,
-            "p99_latency_ms": 57.3268780100625,
+            "mean_latency_ms": 44.7959478301725,
+            "memory_peak_bytes": 57446400,
+            "p95_latency_ms": 57.681830017827444,
+            "p99_latency_ms": 58.42311401851475,
             "request_errors": 0,
             "runs": 1,
-            "throughput_requests_per_second": 22.81197774794269,
+            "throughput_requests_per_second": 23.09338048528456,
             "unexpected_rejections": 0
           },
           {
-            "accepted_packets": 20,
-            "attempted_packets": 21,
-            "cpu_average_percent": 2.3080186947379207,
-            "database_growth_bytes": 65536,
+            "accepted_packets": 21,
+            "attempted_packets": 22,
+            "cpu_average_percent": 2.6003931247400125,
+            "database_growth_bytes": 69632,
             "device_count": 10,
-            "mean_latency_ms": 52.99734211171438,
-            "memory_peak_bytes": 58699776,
-            "p95_latency_ms": 66.78803998511287,
-            "p99_latency_ms": 84.46936800610275,
+            "mean_latency_ms": 50.15594499418512,
+            "memory_peak_bytes": 57536512,
+            "p95_latency_ms": 63.558175042271614,
+            "p99_latency_ms": 63.86331497691572,
             "request_errors": 0,
             "runs": 1,
-            "throughput_requests_per_second": 19.8526536046577,
+            "throughput_requests_per_second": 20.92202011219393,
             "unexpected_rejections": 0
           }
         ],
@@ -208,20 +208,20 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 3.327225200016983,
+      "duration_seconds": 3.303048600035254,
       "failures": [],
       "name": "database_growth",
       "status": "PASS",
       "summary": {
         "integrity_failures": 0,
         "runs": 3,
-        "total_bytes_added": 196608
+        "total_bytes_added": 200704
       }
     },
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.344659100053832,
+      "duration_seconds": 1.3355948000098579,
       "failures": [],
       "name": "reconnection",
       "status": "PASS",
@@ -229,16 +229,16 @@
         "configured_offline_timeout_seconds": 15,
         "cycles": 10,
         "failed": 0,
-        "mean_detection_seconds": 16.106666059995767,
-        "mean_recovery_ms": 41.63968000211753,
-        "p95_recovery_ms": 44.78617000859231,
+        "mean_detection_seconds": 16.106342410005162,
+        "mean_recovery_ms": 43.31346998224035,
+        "p95_recovery_ms": 61.513360001845314,
         "passed": 10
       }
     },
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 2.094405799987726,
+      "duration_seconds": 1.9792905999929644,
       "failures": [],
       "name": "api_benchmarks",
       "status": "PASS",
@@ -249,113 +249,113 @@
           {
             "endpoint": "/api/devices",
             "failure_count": 0,
-            "max_ms": 4.2214999557472765,
-            "mean_ms": 2.727274992503226,
-            "median_ms": 2.619149978272617,
+            "max_ms": 4.492299980483949,
+            "mean_ms": 2.9438399971695617,
+            "median_ms": 2.82100000185892,
             "method": "GET",
-            "min_ms": 2.320699975825846,
-            "p95_ms": 3.2567749643931174,
-            "p99_ms": 4.028554957476444,
+            "min_ms": 2.3176000104285777,
+            "p95_ms": 3.383744999882766,
+            "p99_ms": 4.270588984363711,
             "request_count": 20,
-            "requests_per_second": 366.6663621192637,
+            "requests_per_second": 339.6923749121822,
             "success_count": 20
           },
           {
             "endpoint": "/api/patients",
             "failure_count": 0,
-            "max_ms": 2.253199985716492,
-            "mean_ms": 1.365064992569387,
-            "median_ms": 1.295299967750907,
+            "max_ms": 2.115399984177202,
+            "mean_ms": 1.4364049973664805,
+            "median_ms": 1.450599986128509,
             "method": "GET",
-            "min_ms": 1.1211999808438122,
-            "p95_ms": 1.815060022636317,
-            "p99_ms": 2.1655719931004564,
+            "min_ms": 1.0924999951384962,
+            "p95_ms": 1.8304949713638055,
+            "p99_ms": 2.058418981614522,
             "request_count": 20,
-            "requests_per_second": 732.5658525003669,
+            "requests_per_second": 696.1824846289244,
             "success_count": 20
           },
           {
             "endpoint": "/api/history",
             "failure_count": 0,
-            "max_ms": 1.4513999922201037,
-            "mean_ms": 0.9579899982782081,
-            "median_ms": 0.8876999781932682,
+            "max_ms": 1.424300018697977,
+            "mean_ms": 1.024925004458055,
+            "median_ms": 0.994999980321154,
             "method": "GET",
-            "min_ms": 0.7415000000037253,
-            "p95_ms": 1.3588700065156447,
-            "p99_ms": 1.432893995079212,
+            "min_ms": 0.7726000039838254,
+            "p95_ms": 1.342885007034056,
+            "p99_ms": 1.4080170163651928,
             "request_count": 20,
-            "requests_per_second": 1043.8522341541104,
+            "requests_per_second": 975.6811431571675,
             "success_count": 20
           },
           {
             "endpoint": "/api/packet_logs?limit=50",
             "failure_count": 0,
-            "max_ms": 3.16909997491166,
-            "mean_ms": 2.7430899965111166,
-            "median_ms": 2.7280500216875225,
+            "max_ms": 3.001200035214424,
+            "mean_ms": 2.57408500474412,
+            "median_ms": 2.5647000002209097,
             "method": "GET",
-            "min_ms": 2.3006999981589615,
-            "p95_ms": 3.134804990258999,
-            "p99_ms": 3.162240977981128,
+            "min_ms": 2.1638000034727156,
+            "p95_ms": 2.979824983049184,
+            "p99_ms": 2.996925024781376,
             "request_count": 20,
-            "requests_per_second": 364.552384818537,
+            "requests_per_second": 388.48755894112605,
             "success_count": 20
           },
           {
             "endpoint": "/api/encounters/P-API-0",
             "failure_count": 0,
-            "max_ms": 2.870100026484579,
-            "mean_ms": 2.3454299982404336,
-            "median_ms": 2.3481500102207065,
+            "max_ms": 2.3024000111036003,
+            "mean_ms": 1.9400350021896884,
+            "median_ms": 1.901149982586503,
             "method": "GET",
-            "min_ms": 2.039399987552315,
-            "p95_ms": 2.5736049807164822,
-            "p99_ms": 2.810801017330959,
+            "min_ms": 1.6676000086590648,
+            "p95_ms": 2.2486300440505147,
+            "p99_ms": 2.291646017692983,
             "request_count": 20,
-            "requests_per_second": 426.36105138512363,
+            "requests_per_second": 515.4546175050012,
             "success_count": 20
           },
           {
             "endpoint": "/api/handoff/P-API-0",
             "failure_count": 0,
-            "max_ms": 2.626800036523491,
-            "mean_ms": 2.434560001711361,
-            "median_ms": 2.4950999941211194,
+            "max_ms": 2.5871999678201973,
+            "mean_ms": 2.1753499982878566,
+            "median_ms": 2.1755000052507967,
             "method": "GET",
-            "min_ms": 2.2102000075392425,
-            "p95_ms": 2.565430011600256,
-            "p99_ms": 2.6145260315388437,
+            "min_ms": 1.8835999653674662,
+            "p95_ms": 2.4712050246307626,
+            "p99_ms": 2.5640009791823104,
             "request_count": 20,
-            "requests_per_second": 410.7518398795081,
+            "requests_per_second": 459.69614121270865,
             "success_count": 20
           },
           {
             "endpoint": "/api/vitals",
             "failure_count": 0,
-            "max_ms": 45.89900001883507,
-            "mean_ms": 40.067015000386164,
-            "median_ms": 39.01510001742281,
+            "max_ms": 47.41989995818585,
+            "mean_ms": 41.72145499614999,
+            "median_ms": 41.70579995843582,
             "method": "POST",
-            "min_ms": 37.098600005265325,
-            "p95_ms": 44.80621499242262,
-            "p99_ms": 45.680443013552576,
+            "min_ms": 36.553199985064566,
+            "p95_ms": 47.26619000430219,
+            "p99_ms": 47.38915796740912,
             "request_count": 20,
-            "requests_per_second": 24.958185679426382,
+            "requests_per_second": 23.968483364069613,
             "success_count": 20
           },
           {
             "endpoint": "/api/action",
             "failure_count": 0,
-            "max_ms": 18.670100020244718,
-            "mean_ms": 16.97925501212012,
-            "median_ms": 16.90465002320707,
+            "max_ms": 17.65799999702722,
+            "mean_ms": 15.319410007214174,
+            "median_ms": 15.2249000093434,
             "method": "POST",
-            "min_ms": 15.710499952547252,
-            "p95_ms": 18.57481501356233,
-            "p99_ms": 18.65104301890824,
+            "min_ms": 14.117899991106242,
+            "p95_ms": 16.842899983748794,
+            "p99_ms": 17.494979994371533,
             "request_count": 20,
-            "requests_per_second": 58.8953990788277,
+            "requests_per_second": 65.27666532386579,
             "success_count": 20
           }
         ]
@@ -364,7 +364,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 0.17742090002866462,
+      "duration_seconds": 0.17528020002646372,
       "failures": [],
       "name": "dashboard",
       "status": "PASS",
@@ -380,7 +380,7 @@
     {
       "blocked": [],
       "critical": false,
-      "duration_seconds": 1.2816369000356644,
+      "duration_seconds": 1.3034379999735393,
       "failures": [],
       "name": "shared_ppg",
       "status": "PASS",
@@ -388,13 +388,13 @@
         "assertions": 20,
         "assertions_passed": 20,
         "test_exit_code": 0,
-        "test_runtime_seconds": 1.278160099987872
+        "test_runtime_seconds": 1.300118700019084
       }
     },
     {
       "blocked": [],
       "critical": true,
-      "duration_seconds": 6.237615999998525,
+      "duration_seconds": 6.353142600040883,
       "failures": [
         "tracked_database: server/edgeer.db"
       ],
@@ -405,7 +405,7 @@
         "compilation_exit_code": 0,
         "import_failures": 0,
         "possible_secrets": 0,
-        "python_files": 54,
+        "python_files": 56,
         "repository_findings": [
           {
             "category": "tracked_database",
@@ -475,6 +475,66 @@
           },
           {
             "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 1,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 2,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 46,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\automated_tests\\full_test_suite.txt",
+            "line": 47,
+            "severity": "WARNING"
+          },
+          {
+            "category": "local_ip",
+            "file": "results\\software_validation\\dashboard\\in_app_browser_validation.json",
+            "line": 4,
+            "severity": "INFO"
+          },
+          {
+            "category": "local_ip",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 76,
+            "severity": "INFO"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 93,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\cli_help_checks.txt",
+            "line": 96,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\import_checks.txt",
+            "line": 1,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
+            "file": "results\\software_validation\\static_checks\\import_checks.txt",
+            "line": 5,
+            "severity": "WARNING"
+          },
+          {
+            "category": "personal_path",
             "file": "server\\research\\rr_ppg\\README.md",
             "line": 68,
             "severity": "WARNING"
@@ -484,10 +544,16 @@
             "file": "server\\research\\rr_ppg\\README.md",
             "line": 86,
             "severity": "WARNING"
+          },
+          {
+            "category": "large_file_over_10MB",
+            "file": "server/edgeer.db",
+            "line": null,
+            "severity": "WARNING"
           }
         ],
         "tracked_databases": 1,
-        "tracked_files": 61,
+        "tracked_files": 150,
         "tracked_pyc_files": 0,
         "tracked_venv_files": 0
       }

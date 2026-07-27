@@ -1,0 +1,7 @@
+erDiagram
+    PATIENT ||--o{ ENCOUNTER : has
+    ENCOUNTER ||--o{ VITAL : records
+    ENCOUNTER ||--o{ EVENT : contains
+    ENCOUNTER ||--o| RECHECK_TIMER : may_have
+    DEVICE ||--o{ PACKET_LOG : produces
+    DEVICE o|--o| ENCOUNTER : assigned_to

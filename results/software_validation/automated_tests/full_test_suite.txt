@@ -2,10 +2,16 @@ COMMAND: C:\Users\hassa\AppData\Local\Programs\Python\Python311\python.exe -m un
 CWD: C:\Users\hassa\Documents\EdgeER\server
 EXIT: 0
 test_assigned_device_is_blocked_and_unknown_returns_404 (test_device_retirement.DeviceRetirementTests.test_assigned_device_is_blocked_and_unknown_returns_404) ... ok
+test_dashboard_title_is_edgeer_and_legacy_title_is_absent (test_device_retirement.DeviceRetirementTests.test_dashboard_title_is_edgeer_and_legacy_title_is_absent) ... ok
 test_historical_device_is_retired_and_history_is_preserved (test_device_retirement.DeviceRetirementTests.test_historical_device_is_retired_and_history_is_preserved) ... ok
+test_offline_and_needs_cleaning_devices_remain_lifecycle_active (test_device_retirement.DeviceRetirementTests.test_offline_and_needs_cleaning_devices_remain_lifecycle_active) ... ok
+test_packet_ingestion_never_changes_active_lifecycle_to_retired (test_device_retirement.DeviceRetirementTests.test_packet_ingestion_never_changes_active_lifecycle_to_retired) ... ok
+test_restart_preserves_active_and_retired_lifecycle_states (test_device_retirement.DeviceRetirementTests.test_restart_preserves_active_and_retired_lifecycle_states) ... ok
+test_restore_preserves_only_a_valid_corrupt_active_assignment (test_device_retirement.DeviceRetirementTests.test_restore_preserves_only_a_valid_corrupt_active_assignment) ... ok
 test_retired_device_is_hidden_unassignable_and_rejects_packets (test_device_retirement.DeviceRetirementTests.test_retired_device_is_hidden_unassignable_and_rejects_packets) ... ok
 test_retirement_survives_restart_and_restore_does_not_assign (test_device_retirement.DeviceRetirementTests.test_retirement_survives_restart_and_restore_does_not_assign) ... ok
 test_schema_and_dashboard_expose_retirement_controls (test_device_retirement.DeviceRetirementTests.test_schema_and_dashboard_expose_retirement_controls) ... ok
+test_simulator_has_no_shutdown_retirement_path (test_device_retirement.DeviceRetirementTests.test_simulator_has_no_shutdown_retirement_path) ... ok
 test_unused_device_is_permanently_deleted (test_device_retirement.DeviceRetirementTests.test_unused_device_is_permanently_deleted) ... ok
 test_assignment_race_allows_only_one_active_patient (test_release_candidate.ReleaseCandidateWorkflowTests.test_assignment_race_allows_only_one_active_patient) ... ok
 test_dismissal_requires_cleaning_then_device_can_be_released (test_release_candidate.ReleaseCandidateWorkflowTests.test_dismissal_requires_cleaning_then_device_can_be_released) ... ok
@@ -32,7 +38,7 @@ test_registration_api_returns_structured_device_errors (test_rr_display.Respirat
 test_schema_contains_typed_rr_columns (test_rr_display.RespiratoryRateDisplayTests.test_schema_contains_typed_rr_columns) ... ok
 
 ----------------------------------------------------------------------
-Ran 29 tests in 2.873s
+Ran 35 tests in 3.482s
 
 OK
 
@@ -96,6 +102,6 @@ test_summary_calculation_uses_only_usable_errors (test_rr_validation_session.RRV
 test_existing_offline_and_live_scripts_import_without_hardware (test_script_imports.ScriptImportTests.test_existing_offline_and_live_scripts_import_without_hardware) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 0.415s
+Ran 54 tests in 0.430s
 
 OK

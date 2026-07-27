@@ -4,24 +4,24 @@
     "exit_code": 0,
     "failed": 0,
     "passed": 54,
-    "runtime_seconds": 2.7801220000255853,
+    "runtime_seconds": 12.84365950000938,
     "skipped": 0,
     "xfailed": 0
   },
-  "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+  "git_commit": "6c6071068d9117bc6f9438bf6383f6b807aef387",
   "server": {
-    "collected": 29,
+    "collected": 35,
     "exit_code": 0,
     "failed": 0,
-    "passed": 29,
-    "runtime_seconds": 4.266054899955634,
+    "passed": 35,
+    "runtime_seconds": 9.653841499995906,
     "skipped": 0,
     "xfailed": 0
   },
   "totals": {
-    "collected": 83,
+    "collected": 89,
     "failed": 0,
-    "passed": 83,
+    "passed": 89,
     "skipped": 0,
     "xfailed": 0
   }

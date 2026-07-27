@@ -54,6 +54,6 @@ test_summary_calculation_uses_only_usable_errors (test_rr_validation_session.RRV
 test_existing_offline_and_live_scripts_import_without_hardware (test_script_imports.ScriptImportTests.test_existing_offline_and_live_scripts_import_without_hardware) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 0.382s
+Ran 54 tests in 0.385s
 
 OK

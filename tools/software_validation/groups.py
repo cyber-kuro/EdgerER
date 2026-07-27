@@ -936,7 +936,7 @@ def run_dashboard_checks(ctx: ValidationContext) -> GroupResult:
         checks.extend(static_expectations.items())
         with isolated_client(ctx, "dashboard_contract") as (client, _):
             response = client.get("/")
-            checks.append(("dashboard renders", response.status_code == 200 and "EdgeER Engineering Console" in response.text))
+            checks.append(("dashboard renders", response.status_code == 200 and "<h1>EdgeER</h1>" in response.text))
             client.post("/api/register_device", json={"device_id": "D-DASH-EMPTY"})
             devices = client.get("/api/devices").json()
             checks.append(("offline device excluded from dropdown eligibility", not devices[0]["assignable"]))

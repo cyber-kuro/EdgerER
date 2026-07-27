@@ -657,23 +657,58 @@ def restore_device(device_id: str) -> dict[str, Any]:
             field="device_id",
         )
     if device.get("is_active", True):
-        return {
-            "ok": True,
-            "restored": False,
-            "device": device_public_view(device),
-        }
+        return service_error(
+            "DEVICE_NOT_RETIRED",
+            f"device {device_id} is already active",
+            field="device_id",
+        )
+
+    active_assignment = next(
+        (
+            encounter
+            for encounter in state.encounters.values()
+            if encounter.get("active")
+            and encounter.get("assigned_device_id") == device_id
+        ),
+        None,
+    )
 
     device["is_active"] = True
     device["retired_at"] = None
     device["retired_reason"] = None
-    device["assigned_patient_id"] = None
-    device["assigned_encounter_id"] = None
+    if active_assignment is None:
+        device["assigned_patient_id"] = None
+        device["assigned_encounter_id"] = None
+        device["status"] = (
+            DEVICE_STATUS_AVAILABLE
+            if device_is_online(device)
+            else DEVICE_STATUS_OFFLINE
+        )
+    else:
+        patient_id = active_assignment["patient_id"]
+        encounter_id = active_assignment["encounter_id"]
+        device["assigned_patient_id"] = patient_id
+        device["assigned_encounter_id"] = encounter_id
+        device["status"] = (
+            DEVICE_STATUS_ACTIVE
+            if device_is_online(device)
+            else DEVICE_STATUS_OFFLINE
+        )
+        profile = state.patient_profiles.get(patient_id)
+        if profile is not None:
+            profile["assigned_device_id"] = device_id
+            database.save_patient_profile(patient_id)
     device["updated_at"] = database.utc_now_string()
     database.save_device(device)
     return {
         "ok": True,
         "restored": True,
-        "message": "Device restored to active registry use.",
+        "message": (
+            "Device restored and its valid active encounter assignment was "
+            "preserved."
+            if active_assignment is not None
+            else "Device restored to active registry use without assignment."
+        ),
         "device": device_public_view(device),
     }
 

@@ -4,7 +4,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-6-MISSINGPATIENTID",
-      "device_send_time": "2026-07-21T03:21:52.662079+00:00",
+      "device_send_time": "2026-07-21T09:05:19.625464+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -15,7 +15,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.662079+00:00"
+      "timestamp": "2026-07-21T09:05:19.625464+00:00"
     },
     "response": {
       "accepted": false,
@@ -30,7 +30,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": null,
-      "device_send_time": "2026-07-21T03:21:52.675103+00:00",
+      "device_send_time": "2026-07-21T09:05:19.636485+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -41,7 +41,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.675103+00:00"
+      "timestamp": "2026-07-21T09:05:19.636485+00:00"
     },
     "response": {
       "accepted": false,
@@ -56,7 +56,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-8-EMPTYPATIENTID",
-      "device_send_time": "2026-07-21T03:21:52.687660+00:00",
+      "device_send_time": "2026-07-21T09:05:19.648507+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -67,7 +67,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.687660+00:00"
+      "timestamp": "2026-07-21T09:05:19.648507+00:00"
     },
     "response": {
       "accepted": false,
@@ -82,7 +82,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "",
-      "device_send_time": "2026-07-21T03:21:52.700175+00:00",
+      "device_send_time": "2026-07-21T09:05:19.660520+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -93,7 +93,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.700175+00:00"
+      "timestamp": "2026-07-21T09:05:19.660520+00:00"
     },
     "response": {
       "accepted": false,
@@ -108,7 +108,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-10-WRONGHRTYPE",
-      "device_send_time": "2026-07-21T03:21:52.712811+00:00",
+      "device_send_time": "2026-07-21T09:05:19.672028+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": "fast",
@@ -119,7 +119,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.712811+00:00"
+      "timestamp": "2026-07-21T09:05:19.672028+00:00"
     },
     "response": {
       "accepted": false,
@@ -134,7 +134,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-11-WRONGSPO2TYPE",
-      "device_send_time": "2026-07-21T03:21:52.725173+00:00",
+      "device_send_time": "2026-07-21T09:05:19.683570+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -145,7 +145,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": [],
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.725173+00:00"
+      "timestamp": "2026-07-21T09:05:19.683570+00:00"
     },
     "response": {
       "accepted": false,
@@ -160,7 +160,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-12-WRONGRRTYPE",
-      "device_send_time": "2026-07-21T03:21:52.737760+00:00",
+      "device_send_time": "2026-07-21T09:05:19.694582+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -174,7 +174,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.737760+00:00"
+      "timestamp": "2026-07-21T09:05:19.694582+00:00"
     },
     "response": {
       "accepted": false,
@@ -189,7 +189,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-13-WRONGCONFIDENCETYP",
-      "device_send_time": "2026-07-21T03:21:52.751828+00:00",
+      "device_send_time": "2026-07-21T09:05:19.705604+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -203,7 +203,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.751828+00:00"
+      "timestamp": "2026-07-21T09:05:19.705604+00:00"
     },
     "response": {
       "accepted": false,
@@ -218,7 +218,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-14-HRBELOWRANGE",
-      "device_send_time": "2026-07-21T03:21:52.765471+00:00",
+      "device_send_time": "2026-07-21T09:05:19.717119+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 19,
@@ -229,7 +229,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.765471+00:00"
+      "timestamp": "2026-07-21T09:05:19.717119+00:00"
     },
     "response": {
       "accepted": false,
@@ -244,7 +244,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-15-HRABOVERANGE",
-      "device_send_time": "2026-07-21T03:21:52.779490+00:00",
+      "device_send_time": "2026-07-21T09:05:19.727128+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 251,
@@ -255,7 +255,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.779490+00:00"
+      "timestamp": "2026-07-21T09:05:19.727128+00:00"
     },
     "response": {
       "accepted": false,
@@ -270,7 +270,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-16-SPO2BELOWRANGE",
-      "device_send_time": "2026-07-21T03:21:52.794059+00:00",
+      "device_send_time": "2026-07-21T09:05:19.738639+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -281,7 +281,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 49,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.794059+00:00"
+      "timestamp": "2026-07-21T09:05:19.738639+00:00"
     },
     "response": {
       "accepted": false,
@@ -296,7 +296,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-17-SPO2ABOVERANGE",
-      "device_send_time": "2026-07-21T03:21:52.808083+00:00",
+      "device_send_time": "2026-07-21T09:05:19.750148+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -307,7 +307,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 101,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.808083+00:00"
+      "timestamp": "2026-07-21T09:05:19.750148+00:00"
     },
     "response": {
       "accepted": false,
@@ -322,7 +322,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-18-RRBELOWRANGE",
-      "device_send_time": "2026-07-21T03:21:52.819808+00:00",
+      "device_send_time": "2026-07-21T09:05:19.760655+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -336,7 +336,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.819808+00:00"
+      "timestamp": "2026-07-21T09:05:19.760655+00:00"
     },
     "response": {
       "accepted": false,
@@ -351,7 +351,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-19-RRABOVERANGE",
-      "device_send_time": "2026-07-21T03:21:52.835227+00:00",
+      "device_send_time": "2026-07-21T09:05:19.771669+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -365,7 +365,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.835227+00:00"
+      "timestamp": "2026-07-21T09:05:19.771669+00:00"
     },
     "response": {
       "accepted": false,
@@ -380,7 +380,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-20-CONFIDENCEBELOWZER",
-      "device_send_time": "2026-07-21T03:21:52.848923+00:00",
+      "device_send_time": "2026-07-21T09:05:19.783178+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -393,7 +393,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.848923+00:00"
+      "timestamp": "2026-07-21T09:05:19.783178+00:00"
     },
     "response": {
       "accepted": false,
@@ -408,7 +408,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-21-CONFIDENCEABOVEONE",
-      "device_send_time": "2026-07-21T03:21:52.862978+00:00",
+      "device_send_time": "2026-07-21T09:05:19.795326+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -421,7 +421,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.862978+00:00"
+      "timestamp": "2026-07-21T09:05:19.795326+00:00"
     },
     "response": {
       "accepted": false,
@@ -436,7 +436,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-22-OBJECTTEMPERATUREB",
-      "device_send_time": "2026-07-21T03:21:52.877546+00:00",
+      "device_send_time": "2026-07-21T09:05:19.809161+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -447,7 +447,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.877546+00:00"
+      "timestamp": "2026-07-21T09:05:19.809161+00:00"
     },
     "response": {
       "accepted": false,
@@ -462,7 +462,7 @@
     "packet": {
       "ambient_temp_c": 24.0,
       "device_id": "D-23-OBJECTTEMPERATUREA",
-      "device_send_time": "2026-07-21T03:21:52.892099+00:00",
+      "device_send_time": "2026-07-21T09:05:19.822678+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -473,7 +473,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.892099+00:00"
+      "timestamp": "2026-07-21T09:05:19.822678+00:00"
     },
     "response": {
       "accepted": false,
@@ -488,7 +488,7 @@
     "packet": {
       "ambient_temp_c": -0.1,
       "device_id": "D-24-AMBIENTTEMPERATURE",
-      "device_send_time": "2026-07-21T03:21:52.908119+00:00",
+      "device_send_time": "2026-07-21T09:05:19.834686+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -499,7 +499,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.908119+00:00"
+      "timestamp": "2026-07-21T09:05:19.834686+00:00"
     },
     "response": {
       "accepted": false,
@@ -514,7 +514,7 @@
     "packet": {
       "ambient_temp_c": 60.1,
       "device_id": "D-25-AMBIENTTEMPERATURE",
-      "device_send_time": "2026-07-21T03:21:52.923979+00:00",
+      "device_send_time": "2026-07-21T09:05:19.847706+00:00",
       "device_type": "SIMULATOR",
       "finger_detected": true,
       "heart_rate_bpm": 78.0,
@@ -525,7 +525,7 @@
       "signal_quality": "GOOD",
       "spo2_percent": 98.0,
       "status": "GREEN",
-      "timestamp": "2026-07-21T03:21:52.923979+00:00"
+      "timestamp": "2026-07-21T09:05:19.847706+00:00"
     },
     "response": {
       "accepted": false,

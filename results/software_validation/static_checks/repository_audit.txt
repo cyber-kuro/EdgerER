@@ -1,7 +1,7 @@
-Git commit: 3290b7bb9a949d3e1a9f25914cf924916b23cc5b
+Git commit: 6c6071068d9117bc6f9438bf6383f6b807aef387
 Branch: main
-Tracked files: 61
-Python files compiled: 54
+Tracked files: 150
+Python files compiled: 56
 
 Findings:
 CRITICAL tracked_database server/edgeer.db:
@@ -15,5 +15,16 @@ INFO local_ip RELEASE_CANDIDATE.md:71
 INFO local_ip RELEASE_CANDIDATE.md:72
 INFO local_ip RELEASE_CANDIDATE.md:73
 INFO local_ip edge-node\config.py:6
+WARNING personal_path results\software_validation\automated_tests\full_test_suite.txt:1
+WARNING personal_path results\software_validation\automated_tests\full_test_suite.txt:2
+WARNING personal_path results\software_validation\automated_tests\full_test_suite.txt:46
+WARNING personal_path results\software_validation\automated_tests\full_test_suite.txt:47
+INFO local_ip results\software_validation\dashboard\in_app_browser_validation.json:4
+INFO local_ip results\software_validation\static_checks\cli_help_checks.txt:76
+WARNING personal_path results\software_validation\static_checks\cli_help_checks.txt:93
+WARNING personal_path results\software_validation\static_checks\cli_help_checks.txt:96
+WARNING personal_path results\software_validation\static_checks\import_checks.txt:1
+WARNING personal_path results\software_validation\static_checks\import_checks.txt:5
 WARNING personal_path server\research\rr_ppg\README.md:68
 WARNING personal_path server\research\rr_ppg\README.md:86
+WARNING large_file_over_10MB server/edgeer.db:

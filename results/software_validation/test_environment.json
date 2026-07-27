@@ -1,16 +1,15 @@
 {
-  "captured_at_utc": "2026-07-21T03:21:44.627808+00:00",
+  "captured_at_utc": "2026-07-21T09:04:55.931916+00:00",
   "database_path_type": "isolated temporary SQLite files",
   "deterministic_seed": 20260720,
   "device_counts": [
     1,
     5,
-    10,
-    20
+    10
   ],
-  "duration_seconds_per_scalability_run": 60.0,
+  "duration_seconds_per_scalability_run": 1.0,
   "git_branch": "main",
-  "git_commit": "3290b7bb9a949d3e1a9f25914cf924916b23cc5b",
+  "git_commit": "6c6071068d9117bc6f9438bf6383f6b807aef387",
   "git_dirty": true,
   "installed_package_versions": {
     "fastapi": "0.116.1",
@@ -31,7 +30,7 @@
   "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
   "production_database_used": false,
   "python_version": "3.11.9",
-  "selected_test_mode": "full",
+  "selected_test_mode": "quick",
   "sqlite_version": "3.45.1",
   "total_memory_bytes": 33345478656
 }

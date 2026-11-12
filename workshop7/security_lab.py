@@ -1,60 +1,93 @@
-"""INTENTIONALLY INSECURE CLASSROOM FIXTURE — NEVER DEPLOY.
+"""FIXED CLASSROOM CODEQL EXAMPLES — NOT AN EDGEER PRODUCTION MODULE.
 
-These routes are isolated examples for a CodeQL workshop. They are not
-imported or executed by the EdgeER application. This file intentionally
-contains security flaws so we can identify, document, and remediate them.
-Do not merge this vulnerable revision into the production main branch.
+The preceding commit intentionally contained security flaws for a teaching
+exercise. Every example below has now been remediated. The original alerts
+are preserved in the CodeQL run and SARIF artifact for the workshop report.
 """
-import os
-import pickle
+from ipaddress import ip_address
 import sqlite3
 import subprocess
 
 import requests
-from flask import Flask, redirect, request, send_file
+from flask import Flask, jsonify, redirect, request, send_from_directory
 
 app = Flask(__name__)
 
+# Only server-controlled destinations are permitted.
+ALLOWED_ENDPOINTS = {
+    "status": "https://www.example.org/",
+    "docs": "https://www.example.org/help",
+}
+ALLOWED_REDIRECTS = {
+    "home": "/",
+    "dashboard": "/dashboard",
+}
+
 
 @app.route("/lab/command")
-def command_injection():
+def command_injection_fixed():
     host = request.args.get("host", "127.0.0.1")
-    subprocess.check_output(f"ping -c 1 {host}", shell=True)
-    return "OK"
+    try:
+        validated_host = str(ip_address(host))
+    except ValueError:
+        return jsonify({"error": "host must be an IP address"}), 400
+    try:
+        subprocess.run(
+            ["ping", "-c", "1", validated_host],
+            check=True,
+            capture_output=True,
+            timeout=3,
+        )
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return jsonify({"error": "ping failed"}), 502
+    return jsonify({"status": "OK"})
 
 
 @app.route("/lab/sql")
-def sql_injection():
+def sql_injection_fixed():
     user = request.args.get("user", "")
-    connection = sqlite3.connect("workshop7_users.db")
-    rows = connection.execute("SELECT name FROM users WHERE name = '%s'" % user)
-    return str(rows.fetchall())
+    with sqlite3.connect("workshop7_users.db") as connection:
+        rows = connection.execute(
+            "SELECT name FROM users WHERE name = ?",
+            (user,),
+        ).fetchall()
+    return jsonify({"names": [row[0] for row in rows]})
 
 
 @app.route("/lab/ssrf")
-def ssrf():
-    url = request.args["url"]
-    return requests.get(url, timeout=5).text
+def ssrf_fixed():
+    service = request.args.get("service", "status")
+    url = ALLOWED_ENDPOINTS.get(service)
+    if url is None:
+        return jsonify({"error": "unknown service"}), 400
+    response = requests.get(url, timeout=5)
+    return jsonify({"status_code": response.status_code})
 
 
 @app.route("/lab/path")
-def path_traversal():
-    name = request.args["name"]
-    return send_file(os.path.join("workshop7_files", name))
+def path_traversal_fixed():
+    name = request.args.get("name", "")
+    return send_from_directory("workshop7_files", name, as_attachment=True)
 
 
 @app.route("/lab/redirect")
-def open_redirect():
-    next_url = request.args.get("next", "/")
-    return redirect(next_url)
+def open_redirect_fixed():
+    page = request.args.get("next", "home")
+    return redirect(ALLOWED_REDIRECTS.get(page, "/"))
 
 
 @app.route("/lab/xss")
-def reflected_xss():
+def reflected_xss_fixed():
     name = request.args.get("name", "")
-    return "<h1>Hello " + name + "</h1>"
+    return jsonify({"greeting": f"Hello {name}"})
 
 
 @app.route("/lab/pickle", methods=["POST"])
-def insecure_deserialization():
-    return str(pickle.loads(request.data))
+def insecure_deserialization_fixed():
+    value = request.get_json(silent=True)
+    if not isinstance(value, dict):
+        return jsonify({"error": "expected a JSON object"}), 400
+    message = value.get("message")
+    if not isinstance(message, str):
+        return jsonify({"error": "message must be a string"}), 400
+    return jsonify({"message": message})
